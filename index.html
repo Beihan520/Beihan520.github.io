@@ -1,31 +1,163 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to nginx!</title>
+    <title>我的美食日记 | Simple Food Blog</title>
     <style>
+        /* 基础样式 */
         body {
-            width: 35em;
-            margin: 0 auto;
-            font-family: Tahoma, Verdana, Arial, sans-serif;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        /* 导航栏 */
+        nav {
+            background: #fff;
+            padding: 1rem 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e67e22;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: #e67e22; }
+
+        /* 英雄横幅 */
+        .hero {
+            height: 400px;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                        url('https://unsplash.com') center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+
+        .hero h1 { font-size: 3rem; margin-bottom: 0.5rem; }
+
+        /* 内容容器 */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* 文章卡片网格 */
+        .post-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .post-card:hover { transform: translateY(-5px); }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .post-content { padding: 20px; }
+        .post-tag { color: #e67e22; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .post-title { margin: 10px 0; font-size: 1.25rem; }
+        .post-excerpt { color: #777; font-size: 0.9rem; }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 40px;
+            background: #333;
+            color: white;
+            margin-top: 50px;
         }
     </style>
 </head>
-
 <body>
-    <h1>Welcome to nginx!</h1>
-    <p>If you see this page, the nginx web server is successfully installed and
-        working. Further configuration is required.</p>
 
-    <p>For online documentation and support please refer to
-        <a href="http://nginx.org/">nginx.org</a>.<br />
-        Commercial support is available at
-        <a href="http://nginx.com/">nginx.com</a>.
-    </p>
+    <nav>
+        <a href="#" class="logo">🍳 美食日记</a>
+        <div class="nav-links">
+            <a href="#">首页</a>
+            <a href="#">食谱</a>
+            <a href="#">关于我</a>
+        </div>
+    </nav>
 
-    <p><em>Thank you for using nginx.</em></p>
+    <header class="hero">
+        <h1>寻味生活</h1>
+        <p>每一道菜背后都有一个温暖的故事</p>
+    </header>
+
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 40px;">最新食谱</h2>
+        
+        <div class="post-grid">
+            <!-- 卡片 1 -->
+            <article class="post-card">
+                <img src="https://unsplash.com" alt="Salad" class="post-image">
+                <div class="post-content">
+                    <span class="post-tag">轻食健康</span>
+                    <h3 class="post-title">牛油果能量沙拉</h3>
+                    <p class="post-excerpt">清爽的口感搭配丰富的蛋白质，是开启活力午后的最佳选择...</p>
+                </div>
+            </article>
+
+            <!-- 卡片 2 -->
+            <article class="post-card">
+                <img src="https://unsplash.com" alt="Pizza" class="post-image">
+                <div class="post-content">
+                    <span class="post-tag">意式风味</span>
+                    <h3 class="post-title">手工玛格丽特披萨</h3>
+                    <p class="post-excerpt">从揉面开始，教你做出正宗的薄脆底意式披萨，秘诀全在酱汁里...</p>
+                </div>
+            </article>
+
+            <!-- 卡片 3 -->
+            <article class="post-card">
+                <img src="https://unsplash.com" alt="Toast" class="post-image">
+                <div class="post-content">
+                    <span class="post-tag">甜点时光</span>
+                    <h3 class="post-title">法式焦糖吐司</h3>
+                    <p class="post-excerpt">外酥里糯，每一口都是浓郁的奶香味，配上一杯黑咖啡简直绝了...</p>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 美食博客 | 用心记录每一份美味</p>
+    </footer>
+
 </body>
-
 </html>
