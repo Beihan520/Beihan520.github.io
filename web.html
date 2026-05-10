@@ -926,38 +926,54 @@ function buildSummary(cfg) {
 
 // ─── BAT Generator ────────────────────────────────────────────
 function genBat(cfg) {
-  const envLines = Object.entries(cfg.envVars)
-    .map(([k,v]) => `set CFENV_${k}=${v}`).join('\n');
+  // Build env_vars JSON fragment: {"K":{"value":"V"},...}
+  const envJsonPs = Object.entries(cfg.envVars)
+    .map(([k,v]) => `'${k}'=@{value='${v}'}`)
+    .join(';');
 
-  const envJsonEntries = Object.entries(cfg.envVars)
-    .map(([k,v]) => `${k}=@{value='${v}'}`).join('; ');
+  const flagsPs = cfg.flags ? `'${cfg.flags}'` : '';
 
+  // KV: create namespace via PowerShell+curl inline, no redirect block
   const kvSection = cfg.kvEnabled ? `
 echo   -- STEP 2/5  创建 KV 命名空间
-
-> req_kv.json echo {"title":"%KV_TITLE%"}
-curl -s -X POST "%BASE_URL%/storage/kv/namespaces" ^
-  -H "Authorization: Bearer %TOKEN%" ^
-  -H "Content-Type: application/json" ^
-  -d @req_kv.json -o res_kv.json
-
-powershell -NoProfile -Command "$r = Get-Content 'res_kv.json' | ConvertFrom-Json; if ($r.success) { Set-Content 'kv_id.tmp' $r.result.id; Write-Host '  [OK] KV ID: ' + $r.result.id } else { Write-Warning '  [NG] KV 创建失败（可能已存在），请手动输入 Namespace ID:' }"
-set /p KV_ID= KV Namespace ID: ` : `
+powershell -NoProfile -Command ^
+  "$b=[System.Text.Encoding]::UTF8.GetBytes('{^"title^":\^"${cfg.kvTitle}\^"}');" ^
+  "$r=Invoke-RestMethod '%%BASE_URL%%/storage/kv/namespaces' -Method Post" ^
+  " -Headers @{Authorization='Bearer %%TOKEN%%';'Content-Type'='application/json'} -Body $b;" ^
+  "if($r.success){$r.result.id|Out-File kv_id.tmp -Encoding utf8;Write-Host '[OK] KV ID:'+$r.result.id}" ^
+  "else{Write-Warning '[NG] KV创建失败（可能已存在）'}"
+if not exist kv_id.tmp (
+    set /p KV_ID=  请手动输入已有 KV Namespace ID: 
+    echo !KV_ID!> kv_id.tmp
+)` : `
 echo   -- STEP 2/5  KV 命名空间（跳过）`;
 
-  const kvPatchLine = cfg.kvEnabled
-    ? `$kv = @{ '${cfg.kvBind}' = @{ namespace_id=$kvId } }; $cfgP['kv_namespaces']=$kv; $cfgV['kv_namespaces']=$kv;`
+  // STEP 3: Build JSON entirely in PowerShell inline, no redirect block with {}
+  // We pass all config as PS variables via -Command string
+  const kvPsFragment = cfg.kvEnabled
+    ? `$kvId=(Get-Content kv_id.tmp -Raw).Trim();$kv=@{'${cfg.kvBind}'=@{namespace_id=$kvId}};$cfgP['kv_namespaces']=$kv;$cfgV['kv_namespaces']=$kv;`
     : '';
 
-  const flagsVal = cfg.flags ? `,'${cfg.flags}'` : '';
+  const step3Ps = [
+    `$env_vars=@{${envJsonPs}};`,
+    `$cfgP=@{env_vars=$env_vars;compatibility_date='%COMPAT_DATE%';compatibility_flags=@(${flagsPs})};`,
+    `$cfgV=@{env_vars=$env_vars;compatibility_date='%COMPAT_DATE%';compatibility_flags=@(${flagsPs})};`,
+    kvPsFragment,
+    `$body=@{deployment_configs=@{production=$cfgP;preview=$cfgV}};`,
+    `$json=$body|ConvertTo-Json -Depth 10 -Compress;`,
+    `[IO.File]::WriteAllText('patch_body.json',$json,[Text.Encoding]::UTF8);`,
+    `$h=@{Authorization='Bearer %TOKEN%';'Content-Type'='application/json'};`,
+    `$res=Invoke-RestMethod '%BASE_URL%/pages/projects/%PROJECT_NAME%' -Method Patch -Headers $h -Body $json -ContentType 'application/json';`,
+    `if($res.success){Write-Host '[OK] 项目配置成功'}else{Write-Warning '[NG] 配置失败';$res|ConvertTo-Json|Write-Host}`,
+  ].join('');
 
   const cleanupCmd = cfg.cleanup
-    ? `del /q req_s1.json res_s1.json req_kv.json res_kv.json kv_id.tmp res_s3.json patch_body.json build_patch.ps1 >nul 2>&1`
+    ? `del /q req_s1.json res_s1.json kv_id.tmp patch_body.json res_status.json >nul 2>&1`
     : `:: 清理已禁用`;
 
   const deploySection = cfg.tool === 'wrangler'
     ? `call npx wrangler pages deploy "%UPLOAD_DIR%" --project-name "%PROJECT_NAME%"${cfg.msg ? ` --message "${cfg.msg}"` : ''}`
-    : `:: 使用 curl Direct Upload（需另行实现分片上传）\necho 请使用 Wrangler 或手动上传`;
+    : `echo [!] 请使用 Wrangler CLI 上传：npx wrangler pages deploy "目录" --project-name "项目名"`;
 
   return `@echo off
 :: ================================================
@@ -980,7 +996,6 @@ set UPLOAD_DIR=${cfg.dir}
 set COMPAT_DATE=${cfg.date}
 set PROD_BRANCH=${cfg.branch}
 ${cfg.kvEnabled ? `set KV_TITLE=${cfg.kvTitle}\nset KV_BINDING=${cfg.kvBind}` : ':: KV 已禁用'}
-${envLines}
 set BASE_URL=https://api.cloudflare.com/client/v4/accounts/%ACCOUNT_ID%
 
 cls
@@ -996,15 +1011,13 @@ echo.
 :: ================================================
 echo   -- STEP 1/5  创建 Pages 项目
 
-> req_s1.json echo {"name":"%PROJECT_NAME%","production_branch":"%PROD_BRANCH%"}
-
-curl -s -X POST "%BASE_URL%/pages/projects" ^
-  -H "Authorization: Bearer %TOKEN%" ^
-  -H "Content-Type: application/json" ^
-  -d @req_s1.json -o res_s1.json
-
-findstr /c:"already exists" res_s1.json >nul 2>&1 && echo   [OK] 项目已存在，继续...
-findstr /c:"\"success\":true" res_s1.json >nul 2>&1 && echo   [OK] 项目创建成功
+powershell -NoProfile -Command ^
+  "$h=@{Authorization='Bearer %TOKEN%';'Content-Type'='application/json'};" ^
+  "$b='{^"name^":\^"%PROJECT_NAME%\^",^"production_branch^":\^"%PROD_BRANCH%\^"}';" ^
+  "$r=Invoke-RestMethod '%BASE_URL%/pages/projects' -Method Post -Headers $h -Body $b -ContentType 'application/json';" ^
+  "if($r.success){Write-Host '[OK] 项目创建成功'}" ^
+  "elseif($r.errors-and $r.errors[0].message-match 'already exists'){Write-Host '[OK] 项目已存在，继续...'}" ^
+  "else{Write-Warning '[NG] 创建失败'; $r|ConvertTo-Json|Write-Host}"
 
 :: ================================================
 :: STEP 2/5  KV 命名空间
@@ -1017,23 +1030,7 @@ ${kvSection}
 echo.
 echo   -- STEP 3/5  配置项目
 
-> build_patch.ps1 (
-    echo $cfgP = @{ env_vars=@{ ${envJsonEntries} }; compatibility_date='%COMPAT_DATE%'; compatibility_flags=@(${flagsVal ? `'${cfg.flags}'` : ''}) }
-    echo $cfgV = @{ env_vars=@{ ${envJsonEntries} }; compatibility_date='%COMPAT_DATE%'; compatibility_flags=@(${flagsVal ? `'${cfg.flags}'` : ''}) }
-    ${cfg.kvEnabled ? `echo $kvId = if (Test-Path 'kv_id.tmp') { Get-Content 'kv_id.tmp' } else { '%KV_ID%' }
-    echo ${kvPatchLine}` : ''}
-    echo $body = @{ deployment_configs=@{ production=$cfgP; preview=$cfgV } }
-    echo $json = $body ^| ConvertTo-Json -Depth 10 -Compress
-    echo [IO.File]::WriteAllText('patch_body.json', $json, [Text.Encoding]::UTF8)
-)
-powershell -NoProfile -ExecutionPolicy Bypass -File build_patch.ps1
-
-curl -s -X PATCH "%BASE_URL%/pages/projects/%PROJECT_NAME%" ^
-  -H "Authorization: Bearer %TOKEN%" ^
-  -H "Content-Type: application/json" ^
-  -d @patch_body.json -o res_s3.json
-
-findstr /c:"\"success\":true" res_s3.json >nul && echo   [OK] 项目配置成功 || (echo   [NG] 配置失败: & type res_s3.json)
+powershell -NoProfile -Command "${step3Ps}"
 
 :: ================================================
 :: STEP 4/5  部署文件
@@ -1049,10 +1046,12 @@ ${deploySection}
 echo.
 echo   -- STEP 5/5  查询部署状态
 
-curl -s -X GET "%BASE_URL%/pages/projects/%PROJECT_NAME%/deployments" ^
-  -H "Authorization: Bearer %TOKEN%" -o res_status.json
-
-powershell -NoProfile -Command "$r=(Get-Content 'res_status.json'|ConvertFrom-Json); $d=$r.result[0]; Write-Host ('  状态: ' + $d.latest_stage.name + ' - ' + $d.latest_stage.status); Write-Host ('  URL:  ' + $d.url)"
+powershell -NoProfile -Command ^
+  "$h=@{Authorization='Bearer %TOKEN%'};" ^
+  "$r=Invoke-RestMethod '%BASE_URL%/pages/projects/%PROJECT_NAME%/deployments' -Headers $h;" ^
+  "$d=$r.result[0];" ^
+  "Write-Host ('  状态: '+$d.latest_stage.name+' - '+$d.latest_stage.status);" ^
+  "Write-Host ('  URL:  '+$d.url)"
 
 :: ================================================
 :: 清理
