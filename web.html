@@ -933,18 +933,22 @@ function genBat(cfg) {
 
   const flagsPs = cfg.flags ? `'${cfg.flags}'` : '';
 
-  // KV: create namespace via PowerShell+curl inline, no redirect block
+  // KV: use curl so BAT %vars% expand naturally, parse result with PowerShell
   const kvSection = cfg.kvEnabled ? `
 echo   -- STEP 2/5  创建 KV 命名空间
+curl -s -X POST "%BASE_URL%/storage/kv/namespaces" ^
+  -H "Authorization: Bearer %TOKEN%" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"title\":\"${cfg.kvTitle}\"}" -o res_kv.json
 powershell -NoProfile -Command ^
-  "$b=[System.Text.Encoding]::UTF8.GetBytes('{^"title^":\^"${cfg.kvTitle}\^"}');" ^
-  "$r=Invoke-RestMethod '%%BASE_URL%%/storage/kv/namespaces' -Method Post" ^
-  " -Headers @{Authorization='Bearer %%TOKEN%%';'Content-Type'='application/json'} -Body $b;" ^
-  "if($r.success){$r.result.id|Out-File kv_id.tmp -Encoding utf8;Write-Host '[OK] KV ID:'+$r.result.id}" ^
-  "else{Write-Warning '[NG] KV创建失败（可能已存在）'}"
+  "$r=Get-Content res_kv.json|ConvertFrom-Json;" ^
+  "if($r.success){$r.result.id.Trim()|Out-File kv_id.tmp -Encoding utf8 -NoNewline;Write-Host '[OK] KV ID: '+$r.result.id}" ^
+  "else{Write-Warning '[NG] KV创建失败，可能已存在'}"
 if not exist kv_id.tmp (
-    set /p KV_ID=  请手动输入已有 KV Namespace ID: 
-    echo !KV_ID!> kv_id.tmp
+    set /p _KV_ID=  请手动输入已有 KV Namespace ID: 
+    echo !_KV_ID!> kv_id.tmp
+) else (
+    echo   [OK] KV ID 已自动写入，跳过手动输入
 )` : `
 echo   -- STEP 2/5  KV 命名空间（跳过）`;
 
