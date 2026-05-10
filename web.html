@@ -1050,12 +1050,9 @@ ${deploySection}
 echo.
 echo   -- STEP 5/5  查询部署状态
 
-powershell -NoProfile -Command ^
-  "$h=@{Authorization='Bearer %TOKEN%'};" ^
-  "$r=Invoke-RestMethod '%BASE_URL%/pages/projects/%PROJECT_NAME%/deployments' -Headers $h;" ^
-  "$d=$r.result[0];" ^
-  "Write-Host ('  状态: '+$d.latest_stage.name+' - '+$d.latest_stage.status);" ^
-  "Write-Host ('  URL:  '+$d.url)"
+curl -s -X GET "%BASE_URL%/pages/projects/%PROJECT_NAME%/deployments" ^
+  -H "Authorization: Bearer %TOKEN%" -o res_status.json
+powershell -NoProfile -Command "$r=Get-Content res_status.json|ConvertFrom-Json; $d=$r.result[0]; Write-Host ('  状态: '+$d.latest_stage.name+' - '+$d.latest_stage.status); Write-Host ('  URL:  '+$d.url)"
 
 :: ================================================
 :: 清理
