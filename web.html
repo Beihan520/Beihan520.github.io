@@ -5,390 +5,510 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CF Pages 部署配置器</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
-:root{
-  --bg:#0a0c10;--surface:#0f1318;--card:#141920;
-  --border:#1e2732;--border-bright:#2d3a4a;
-  --accent:#00d4aa;--accent-dim:#00a882;--accent-glow:rgba(0,212,170,.15);
-  --accent2:#ff6b35;--text:#c8d8e8;--text-dim:#607080;--text-bright:#e8f4ff;
-  --error:#ff4d6a;--mono:'JetBrains Mono',monospace;
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f8f7f4;
+  --surface: #ffffff;
+  --border: #e2e0db;
+  --border-strong: #c8c5be;
+  --text: #1a1917;
+  --text-mid: #6b6860;
+  --text-dim: #a09d98;
+  --accent: #1a1917;
+  --accent-inv: #f8f7f4;
+  --red: #c0392b;
+  --green: #27ae60;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --radius: 4px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.container{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:48px 24px 90px}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+}
+
 /* header */
-.header{margin-bottom:44px;padding-bottom:28px;border-bottom:1px solid var(--border)}
-.header-tag{font-size:11px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.header-tag::before{content:'';width:20px;height:1px;background:var(--accent)}
-h1{font-family:'Space Mono',monospace;font-size:clamp(20px,4vw,30px);color:var(--text-bright);font-weight:700;line-height:1.2;margin-bottom:10px}
-h1 span{color:var(--accent)}
-.header-sub{font-size:13px;color:var(--text-dim)}
+.header { margin-bottom: 56px; }
+.header-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+h1 {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.header-sub {
+  font-size: 13px;
+  color: var(--text-mid);
+}
+
+/* divider */
+hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
 /* section */
-.section{margin-bottom:32px}
-.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.section-title{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;flex:1}
-.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border-bright),transparent)}
-.section-num{width:20px;height:20px;background:var(--accent);color:var(--bg);border-radius:3px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.section { margin-bottom: 36px; }
+.section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
 /* fields */
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.field-grid.cols3{grid-template-columns:1fr 1fr 1fr}
-@media(max-width:640px){.field-grid,.field-grid.cols3{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:11px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
-.field label .req{color:var(--accent2);margin-left:3px}
-.field input{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px 13px;font-family:var(--mono);font-size:13px;color:var(--text-bright);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
-.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-.field input::placeholder{color:var(--text-dim);opacity:.45}
-.field-hint{font-size:11px;color:var(--text-dim);margin-top:1px}
-/* info box */
-.info-box{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:11px 15px;font-size:12px;color:var(--text-dim);margin-top:10px;line-height:1.6}
-.info-box strong{color:var(--accent)}
-/* toggle */
-.toggle-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:11px 13px;cursor:pointer;user-select:none;transition:border-color .2s}
-.toggle-row:hover{border-color:var(--border-bright)}
-.toggle-row.active{border-color:var(--accent)}
-.toggle-switch{width:36px;height:20px;background:var(--border-bright);border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
-.toggle-switch::after{content:'';position:absolute;width:14px;height:14px;background:var(--text-dim);border-radius:50%;top:3px;left:3px;transition:transform .2s,background .2s}
-.toggle-row.active .toggle-switch{background:var(--accent-dim)}
-.toggle-row.active .toggle-switch::after{transform:translateX(16px);background:var(--accent)}
-.toggle-label{font-size:13px;color:var(--text)}
-.collapsible{overflow:hidden;max-height:0;transition:max-height .35s ease}
-.collapsible.open{max-height:600px}
-/* add btn */
-.add-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;background:transparent;border:1px dashed var(--accent-dim);color:var(--accent);border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
-.add-btn:hover{background:var(--accent-glow);border-color:var(--accent);box-shadow:0 0 10px rgba(0,212,170,.15)}
-/* env var rows */
-.var-list{display:flex;flex-direction:column;gap:9px}
-.var-row{display:grid;grid-template-columns:1fr 1fr 34px;gap:10px;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:11px 13px;transition:border-color .2s;animation:rowIn .2s ease}
-@keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.var-row:hover{border-color:var(--border-bright)}
-.var-row.locked{border-color:rgba(0,212,170,.2)}
-.badge{display:inline-block;font-size:9px;background:rgba(0,212,170,.12);color:var(--accent);border-radius:3px;padding:1px 5px;margin-left:5px;letter-spacing:.05em;vertical-align:middle}
-.badge-kv{background:rgba(255,107,53,.12);color:var(--accent2)}
-.del-btn{width:34px;height:34px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:20px;flex-shrink:0}
-.del-btn:hover{border-color:var(--error);color:var(--error);background:rgba(255,77,106,.08)}
-.del-btn:disabled{opacity:.2;cursor:not-allowed}
-@media(max-width:640px){.var-row{grid-template-columns:1fr}.del-btn{margin-top:0;width:100%}}
-/* kv rows same style */
-.kv-row{display:grid;grid-template-columns:1fr 1fr 34px;gap:10px;align-items:start;background:var(--card);border:1px solid rgba(255,107,53,.2);border-radius:7px;padding:11px 13px;transition:border-color .2s;animation:rowIn .2s ease;margin-top:10px}
-.kv-row:hover{border-color:rgba(255,107,53,.4)}
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+
+.field label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  letter-spacing: .06em;
+}
+.field label .req { color: var(--red); margin-left: 2px; }
+
+.field input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+}
+.field input:focus { border-color: var(--accent); }
+.field input::placeholder { color: var(--text-dim); }
+.field-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+/* info */
+.info {
+  border-left: 2px solid var(--border-strong);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-mid);
+  margin-top: 12px;
+  line-height: 1.7;
+}
+.info strong { color: var(--text); font-weight: 500; }
+
+/* env rows */
+.var-list { display: flex; flex-direction: column; gap: 8px; }
+.var-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 32px;
+  gap: 8px;
+  align-items: end;
+}
+@media (max-width: 560px) { .var-row { grid-template-columns: 1fr; } }
+.var-row.locked .field input { background: #f3f2ef; color: var(--text-mid); }
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all .15s;
+  margin-top: 10px;
+}
+.add-btn:hover { border-color: var(--accent); color: var(--text); }
+
+.del-btn {
+  width: 32px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.del-btn:hover { border-color: var(--red); color: var(--red); }
+.del-btn:disabled { opacity: .25; cursor: not-allowed; pointer-events: none; }
+
+/* kv toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .15s;
+  margin-bottom: 12px;
+}
+.toggle-row:hover { border-color: var(--border-strong); }
+.toggle-row.on { border-color: var(--accent); }
+
+.toggle-switch {
+  width: 32px;
+  height: 18px;
+  background: var(--border-strong);
+  border-radius: 9px;
+  position: relative;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform .15s;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+.toggle-row.on .toggle-switch { background: var(--accent); }
+.toggle-row.on .toggle-switch::after { transform: translateX(14px); }
+.toggle-label { font-size: 13px; color: var(--text-mid); }
+.toggle-row.on .toggle-label { color: var(--text); }
+
+.collapsible { overflow: hidden; max-height: 0; transition: max-height .3s ease; }
+.collapsible.open { max-height: 400px; }
+
+/* kv row */
+.kv-block { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+@media (max-width: 560px) { .kv-block { grid-template-columns: 1fr; } }
+
 /* generate */
-.generate-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:background .2s,transform .1s,box-shadow .2s;text-transform:uppercase;margin-top:36px}
-.generate-btn:hover{background:#00eebb;box-shadow:0 0 24px rgba(0,212,170,.4);transform:translateY(-1px)}
-.generate-btn:active{transform:translateY(0)}
+.generate-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  background: var(--accent);
+  color: var(--accent-inv);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity .15s;
+  margin-top: 40px;
+}
+.generate-btn:hover { opacity: .85; }
+.generate-btn:active { opacity: .7; }
+
 /* preview */
-.preview-section{margin-top:36px;display:none}
-.preview-section.visible{display:block}
-.preview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
-.preview-code{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;font-size:11.5px;line-height:1.7;color:var(--text);overflow-x:auto;white-space:pre;max-height:420px;overflow-y:auto}
-.preview-code::-webkit-scrollbar{width:4px;height:4px}
-.preview-code::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
-.download-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;text-decoration:none}
-.download-btn:hover{background:var(--accent-glow);box-shadow:0 0 12px rgba(0,212,170,.2)}
-@keyframes flashBorder{0%{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}100%{border-color:var(--border);box-shadow:none}}
-.flash{animation:flashBorder 1s ease forwards}
+.preview-section { margin-top: 40px; display: none; }
+.preview-section.visible { display: block; }
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.preview-head .section-label { margin-bottom: 0; flex: 1; }
+
+.dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background .15s;
+}
+.dl-btn:hover { background: var(--accent); color: var(--accent-inv); }
+
+.preview-code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--text-mid);
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.preview-code::-webkit-scrollbar { width: 3px; height: 3px; }
+.preview-code::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="wrap">
 
-<!-- ── Header ── -->
+<!-- Header -->
 <div class="header">
-  <div class="header-tag">Cloudflare Pages</div>
-  <h1>部署配置生成器 <span>v3.3</span></h1>
-  <p class="header-sub">填写参数，自动生成定制化的 .bat 部署脚本并一键下载</p>
+  <div class="header-label">Cloudflare Pages — Deploy Configurator</div>
+  <h1>部署脚本生成器</h1>
+  <p class="header-sub">填写参数，生成定制化 .bat 部署脚本</p>
 </div>
 
-<!-- ── §1 API 凭证 ── -->
+<!-- §1 API 凭证 -->
 <div class="section">
-  <div class="section-hdr">
-    <div class="section-title"><span class="section-num">1</span>API 凭证</div>
-  </div>
+  <div class="section-label">01 · API 凭证</div>
   <div class="field-grid">
     <div class="field">
-      <label>CLOUDFLARE_API_TOKEN <span class="req">*</span></label>
-      <input id="apiToken" type="text" placeholder="cfat_..." value="cfat_ylquMsVa6veCxYX2H741cqm21P2zjH7Wi9Goji5L3244d87e">
+      <label>API_TOKEN<span class="req">*</span></label>
+      <input id="apiToken" type="text" placeholder="cfat_...">
     </div>
     <div class="field">
-      <label>CLOUDFLARE_ACCOUNT_ID <span class="req">*</span></label>
-      <input id="accountId" type="text" placeholder="32位 hex" value="e8df7d714dcbf0a2f4591c1a6d821841">
+      <label>ACCOUNT_ID<span class="req">*</span></label>
+      <input id="accountId" type="text" placeholder="32位 hex">
     </div>
   </div>
-  <div class="info-box"><strong>权限提示：</strong>Token 需要 <strong>KV Storage</strong> 和 <strong>Pages</strong> 读写权限</div>
+  <div class="info">Token 需要 <strong>KV Storage</strong> 和 <strong>Pages</strong> 读写权限</div>
 </div>
 
-<!-- ── §2 项目信息 ── -->
+<hr>
+
+<!-- §2 项目信息 -->
 <div class="section">
-  <div class="section-hdr">
-    <div class="section-title"><span class="section-num">2</span>项目基础信息</div>
-  </div>
+  <div class="section-label">02 · 项目信息</div>
   <div class="field-grid">
     <div class="field">
-      <label>PROJECT_NAME 项目名称 <span class="req">*</span></label>
-      <input id="projectName" type="text" placeholder="my-cf-pages-project">
+      <label>PROJECT_NAME<span class="req">*</span></label>
+      <input id="projectName" type="text" placeholder="my-cf-pages">
       <div class="field-hint">Pages 项目名，不含空格</div>
     </div>
     <div class="field">
-      <label>UPLOAD_DIR 本地部署目录 <span class="req">*</span></label>
+      <label>UPLOAD_DIR<span class="req">*</span></label>
       <input id="uploadDir" type="text" placeholder="C:\path\to\dist">
-      <div class="field-hint">要上传的本地文件夹完整路径</div>
+      <div class="field-hint">本地部署文件夹完整路径</div>
     </div>
   </div>
 </div>
 
-<!-- ── §3 兼容性 ── -->
+<hr>
+
+<!-- §3 兼容性 -->
 <div class="section">
-  <div class="section-hdr">
-    <div class="section-title"><span class="section-num">3</span>兼容性配置</div>
-  </div>
+  <div class="section-label">03 · 兼容性</div>
   <div class="field-grid">
     <div class="field">
       <label>兼容性日期</label>
       <input id="compatDate" type="text" placeholder="YYYY-MM-DD">
-      <div class="field-hint">留空使用当天日期</div>
+      <div class="field-hint">留空使用当天</div>
     </div>
     <div class="field">
       <label>兼容性标志</label>
       <input id="compatFlags" type="text" placeholder="nodejs_compat（可选）">
-      <div class="field-hint">多个用逗号分隔，留空跳过</div>
+      <div class="field-hint">多个用逗号分隔</div>
     </div>
   </div>
 </div>
 
-<!-- ── §4 Pages 环境变量 ── -->
+<hr>
+
+<!-- §4 环境变量 -->
 <div class="section">
-  <div class="section-hdr">
-    <div class="section-title"><span class="section-num">4</span>Pages 环境变量</div>
-    <button class="add-btn" onclick="addEnvRow()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      添加变量
-    </button>
-  </div>
+  <div class="section-label">04 · 环境变量</div>
   <div class="var-list" id="envList"></div>
-  <div class="info-box">前两行为<strong>必填锁定行</strong>，对应原脚本 ADMIN / UUID；可继续添加任意数量自定义变量，均会写入 production &amp; preview 配置。</div>
+  <button class="add-btn" onclick="addEnvRow()">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    添加变量
+  </button>
+  <div class="info">前两行为锁定行（ADMIN / UUID），可继续添加自定义变量</div>
 </div>
 
-<!-- ── §5 KV 绑定 ── -->
+<hr>
+
+<!-- §5 KV 绑定 -->
 <div class="section">
-  <div class="section-hdr">
-    <div class="section-title"><span class="section-num">5</span>KV 绑定</div>
-    <button class="add-btn" id="addKvBtn" onclick="addKvRow()" style="border-color:rgba(255,107,53,.5);color:var(--accent2)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      添加 KV
-    </button>
-  </div>
-  <!-- toggle for enabling KV -->
+  <div class="section-label">05 · KV 绑定</div>
   <div class="toggle-row" id="kvToggle" onclick="toggleKV()">
     <div class="toggle-switch"></div>
     <div class="toggle-label">启用 KV 命名空间绑定</div>
   </div>
   <div class="collapsible" id="kvSection">
-    <!-- default kv row injected by JS -->
-    <div class="var-list" id="kvList"></div>
-    <div class="info-box" style="margin-top:10px;border-color:rgba(255,107,53,.2);background:rgba(255,107,53,.04)">
-      <strong style="color:var(--accent2)">绑定名称</strong> 对应 wrangler 里的 binding，<strong style="color:var(--accent2)">KV 命名空间名称</strong> 用于创建新 KV（运行时可交互修改）。可添加多个 KV 绑定。
+    <div class="kv-block">
+      <div class="field">
+        <label>KV 绑定名称</label>
+        <input id="kvBinding" type="text" placeholder="KV" value="KV">
+        <div class="field-hint">wrangler binding 名称</div>
+      </div>
+      <div class="field">
+        <label>KV 命名空间名称</label>
+        <input id="kvTitle" type="text" placeholder="my-kv-namespace">
+        <div class="field-hint">创建新 KV 时使用</div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ── Generate ── -->
+<!-- Generate -->
 <button class="generate-btn" onclick="generateBat()">
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-  生成 .bat 脚本
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+  生成 deploy.bat
 </button>
 
-<!-- ── Preview ── -->
+<!-- Preview -->
 <div class="preview-section" id="previewSection">
-  <div class="preview-header">
-    <div class="section-title" style="margin:0;flex:1">
-      <span class="section-num" style="background:var(--accent2)">↓</span>预览 &amp; 下载
-    </div>
-    <a class="download-btn" id="downloadBtn" href="#" download="deploy.bat">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      下载 deploy.bat
+  <hr>
+  <div class="preview-head">
+    <div class="section-label">预览 &amp; 下载</div>
+    <a class="dl-btn" id="downloadBtn" href="#" download="deploy.bat">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      下载 .bat
     </a>
   </div>
   <div class="preview-code" id="previewCode"></div>
 </div>
 
-</div><!-- /container -->
+</div>
+
 <script>
-// ── today default ──────────────────────────────────────────────
+// today default
 (function(){
-  const d=new Date();
-  document.getElementById('compatDate').value=
-    d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const d = new Date();
+  document.getElementById('compatDate').value =
+    d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 })();
 
-// ── KV toggle ─────────────────────────────────────────────────
-let kvEnabled=false;
-function toggleKV(){
-  kvEnabled=!kvEnabled;
-  document.getElementById('kvToggle').classList.toggle('active',kvEnabled);
-  document.getElementById('kvSection').classList.toggle('open',kvEnabled);
-  document.getElementById('addKvBtn').style.opacity=kvEnabled?'1':'0.45';
-  document.getElementById('addKvBtn').style.pointerEvents=kvEnabled?'auto':'none';
+// KV toggle
+let kvEnabled = false;
+function toggleKV() {
+  kvEnabled = !kvEnabled;
+  document.getElementById('kvToggle').classList.toggle('on', kvEnabled);
+  document.getElementById('kvSection').classList.toggle('open', kvEnabled);
 }
 
-// ── helpers ───────────────────────────────────────────────────
-function esc(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-const TRASH_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+// helpers
+const TRASH = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+function esc(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── env var rows ───────────────────────────────────────────────
-let envCtr=0;
-function addEnvRow(name='',val='',locked=false){
-  const id=++envCtr;
-  const list=document.getElementById('envList');
-  const div=document.createElement('div');
-  div.className='var-row'+(locked?' locked':'');
-  div.dataset.eid=id;
-  div.innerHTML=`
+let envCtr = 0;
+function addEnvRow(name='', val='', locked=false) {
+  const id = ++envCtr;
+  const list = document.getElementById('envList');
+  const div = document.createElement('div');
+  div.className = 'var-row' + (locked ? ' locked' : '');
+  div.dataset.eid = id;
+  div.innerHTML = `
     <div class="field">
-      <label>变量名称${locked?'<span class="badge">必填</span>':''}</label>
-      <input type="text" placeholder="VAR_NAME" value="${esc(name)}"${locked?' style="border-color:rgba(0,212,170,.3)"':''}>
+      <label>变量名称</label>
+      <input type="text" placeholder="VAR_NAME" value="${esc(name)}">
     </div>
     <div class="field">
-      <label>变量值${locked?'<span class="badge">必填</span>':''}</label>
+      <label>变量值</label>
       <input type="text" placeholder="value" value="${esc(val)}">
     </div>
-    <button class="del-btn" onclick="delRow(this,'env')" ${locked?'disabled title="默认行不可删"':''} title="删除">${TRASH_SVG}</button>`;
+    <button class="del-btn" onclick="this.closest('.var-row').remove()" ${locked?'disabled':''} title="删除">${TRASH}</button>`;
   list.appendChild(div);
-}
-
-// ── kv rows ───────────────────────────────────────────────────
-let kvCtr=0;
-function addKvRow(binding='KV',kvName=''){
-  const id=++kvCtr;
-  const list=document.getElementById('kvList');
-  const div=document.createElement('div');
-  div.className='kv-row';
-  div.dataset.kid=id;
-  div.innerHTML=`
-    <div class="field">
-      <label>KV 绑定名称 <span class="badge badge-kv">binding</span></label>
-      <input type="text" placeholder="KV" value="${esc(binding)}" style="border-color:rgba(255,107,53,.25)">
-    </div>
-    <div class="field">
-      <label>KV 命名空间名称 <span class="badge badge-kv">title</span></label>
-      <input type="text" placeholder="my-kv-namespace" value="${esc(kvName)}" style="border-color:rgba(255,107,53,.25)">
-    </div>
-    <button class="del-btn" onclick="delRow(this,'kv')" title="删除">${TRASH_SVG}</button>`;
-  list.appendChild(div);
-}
-
-function delRow(btn,type){
-  btn.closest(type==='kv'?'.kv-row':'.var-row').remove();
 }
 
 // seed defaults
-addEnvRow('ADMIN','ADMIN',true);
-addEnvRow('UUID','661471cc-c3c4-45d5-a2e9-3f243330510b',true);
-addKvRow('KV','');
+addEnvRow('ADMIN', 'ADMIN', true);
+addEnvRow('UUID', '661471cc-c3c4-45d5-a2e9-3f243330510b', true);
 
-// ── collect ────────────────────────────────────────────────────
-function collectEnv(){
-  return [...document.querySelectorAll('#envList .var-row')].map(r=>{
-    const ins=r.querySelectorAll('input');
-    return{name:ins[0].value.trim(),val:ins[1].value.trim()};
-  }).filter(v=>v.name);
-}
-function collectKV(){
-  return [...document.querySelectorAll('#kvList .kv-row')].map(r=>{
-    const ins=r.querySelectorAll('input');
-    return{binding:ins[0].value.trim(),title:ins[1].value.trim()};
-  }).filter(v=>v.binding);
+function collectEnv() {
+  return [...document.querySelectorAll('#envList .var-row')].map(r => {
+    const ins = r.querySelectorAll('input');
+    return { name: ins[0].value.trim(), val: ins[1].value.trim() };
+  }).filter(v => v.name);
 }
 
-// ── generate ───────────────────────────────────────────────────
-function generateBat(){
-  const apiToken   =document.getElementById('apiToken').value.trim();
-  const accountId  =document.getElementById('accountId').value.trim();
-  const projectName=document.getElementById('projectName').value.trim();
-  const uploadDir  =document.getElementById('uploadDir').value.trim();
-  const compatDate =document.getElementById('compatDate').value.trim();
-  const compatFlags=document.getElementById('compatFlags').value.trim();
-  const envVars    =collectEnv();
-  const kvRows     =collectKV();
+// generate
+function generateBat() {
+  const apiToken    = document.getElementById('apiToken').value.trim();
+  const accountId   = document.getElementById('accountId').value.trim();
+  const projectName = document.getElementById('projectName').value.trim();
+  const uploadDir   = document.getElementById('uploadDir').value.trim();
+  const compatDate  = document.getElementById('compatDate').value.trim();
+  const kvBinding   = document.getElementById('kvBinding').value.trim() || 'KV';
+  const kvTitle     = document.getElementById('kvTitle').value.trim();
+  const envVars     = collectEnv();
 
-  if(!apiToken||!accountId){alert('请填写 API Token 和 Account ID');return;}
-  if(!projectName){alert('请填写 PROJECT_NAME');return;}
-  if(!uploadDir){alert('请填写 UPLOAD_DIR');return;}
-  if(!envVars.length){alert('至少需要一个环境变量');return;}
+  if (!apiToken || !accountId) { alert('请填写 API Token 和 Account ID'); return; }
+  if (!projectName) { alert('请填写 PROJECT_NAME'); return; }
+  if (!uploadDir)   { alert('请填写 UPLOAD_DIR'); return; }
+  if (!envVars.length) { alert('至少需要一个环境变量'); return; }
 
-  const var1n=envVars[0]?envVars[0].name:'ADMIN';
-  const var1v=envVars[0]?envVars[0].val:'';
-  const var2n=envVars[1]?envVars[1].name:'UUID';
-  const var2v=envVars[1]?envVars[1].val:'';
+  const var1n = envVars[0]?.name || 'ADMIN';
+  const var1v = envVars[0]?.val  || '';
+  const var2n = envVars[1]?.name || 'UUID';
+  const var2v = envVars[1]?.val  || '';
+  const extraSets = envVars.slice(2).map(v => `set ${v.name}=${v.val}`).join('\r\n');
 
-  // extra vars beyond first two
-  const extraSets=envVars.slice(2).map(v=>`set ${v.name}=${v.val}`).join('\r\n');
-
-  // env_vars echo lines for patch JSON
-  function envEcho(envArr,pad){
-    return envArr.map((v,i)=>{
-      const comma=i<envArr.length-1?',':'';
+  // build env_vars echo block for patch JSON
+  function envEchoBlock(pad) {
+    return envVars.map((v, i) => {
+      const comma = i < envVars.length - 1 ? ',' : '';
       return `    echo ${pad}"${v.name}": { "value": "${v.val.replace(/"/g,'\\"')}" }${comma}`;
     }).join('\r\n');
   }
-  const evEcho=envEcho(envVars,'        ');
 
-  // kv_namespaces echo lines
-  function kvEcho(kvArr,pad){
-    return kvArr.map((k,i)=>{
-      const comma=i<kvArr.length-1?',':'';
-      return `    echo ${pad}"${k.binding}": { "namespace_id": "!KV_ID_${k.binding}!" }${comma}`;
-    }).join('\r\n');
-  }
-  const kvEchoBlock=kvEnabled&&kvRows.length?kvEcho(kvRows,'        '):'';
-
-  // build kv creation steps
-  function buildKvSteps(kvArr){
-    if(!kvEnabled||!kvArr.length) return '';
-    return kvArr.map((k,i)=>`
-:: -- 创建 KV: ${k.binding}
-set KV_NAMESPACE_TITLE_${k.binding}=${k.title}
-:CREATE_KV_${k.binding}
-set KV_ID_${k.binding}=
-if "!KV_NAMESPACE_TITLE_${k.binding}!"=="" goto :SKIP_KV_${k.binding}
-> req_kv_${k.binding}.json echo {"title":"!KV_NAMESPACE_TITLE_${k.binding}!"}
-curl -s -X POST "%BASE_URL%/storage/kv/namespaces" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -H "Content-Type: application/json" -d @req_kv_${k.binding}.json -o res_kv_${k.binding}.json
-findstr /c:"\\"success\\":true" res_kv_${k.binding}.json >nul 2>&1
-if not errorlevel 1 (
-    for /f "usebackq delims=" %%I in (\`powershell -NoProfile -Command "(Get-Content 'res_kv_${k.binding}.json' | ConvertFrom-Json).result.id"\`) do set KV_ID_${k.binding}=%%I
-    echo   [OK] KV [${k.binding}] 创建成功，ID: !KV_ID_${k.binding}!
-    goto :SKIP_KV_${k.binding}
-)
-echo   [NG] KV [${k.binding}] 创建失败
-set C=
-set /p C=  [1] 重试  [2/回车] 跳过: 
-if "!C!"=="1" (set /p KV_NAMESPACE_TITLE_${k.binding}=  新名称: & goto :CREATE_KV_${k.binding})
-:SKIP_KV_${k.binding}`).join('\r\n');
-  }
-
-  // kv_namespaces patch block
-  function kvPatchBlock(kvArr,pad){
-    if(!kvEnabled||!kvArr.length) return '';
-    const lines=kvArr.map((k,i)=>{
-      const comma=i<kvArr.length-1?',':'';
-      return `    echo ${pad}"${k.binding}": { "namespace_id": "!KV_ID_${k.binding}!" }${comma}`;
-    }).join('\r\n');
-    return `    echo       "kv_namespaces": {\r\n${lines}\r\n    echo       },`;
-  }
-
-  const hasKV=kvEnabled&&kvRows.length>0;
-  const kvProdBlock=kvPatchBlock(kvRows,'        ');
-
-  // compose env_vars + optional kv_namespaces for patch JSON
-  function patchEnvSection(pad){
-    let out=`    echo ${pad}"env_vars": {\r\n${evEcho}\r\n    echo ${pad}}`;
-    if(hasKV){
-      out+=`,\r\n    echo ${pad}"kv_namespaces": {\r\n${kvEchoBlock}\r\n    echo ${pad}}`;
+  // patch section (env + optional kv)
+  function patchSection(pad) {
+    let out = `    echo ${pad}"env_vars": {\r\n${envEchoBlock(pad + '  ')}\r\n    echo ${pad}}`;
+    if (kvEnabled) {
+      out += `,\r\n    echo ${pad}"kv_namespaces": {\r\n    echo ${pad}  "${kvBinding}": { "namespace_id": "!KV_ID!" }\r\n    echo ${pad}}`;
     }
     return out;
   }
 
-  const bat=`@echo off
+  const bat =
+`@echo off
 if "%1"=="--run" goto :MAIN
 cmd /k "%~f0" --run
 exit /b
@@ -397,46 +517,38 @@ exit /b
 setlocal enabledelayedexpansion
 chcp 65001 >nul
 
-:: CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID  给Kv 和page权限
 set CLOUDFLARE_API_TOKEN=${apiToken}
 set CLOUDFLARE_ACCOUNT_ID=${accountId}
-set KV_BINDING_NAME=${kvRows[0]?kvRows[0].binding:'KV'}
+set PROJECT_NAME=${projectName}
+set UPLOAD_DIR=${uploadDir}
+set KV_BINDING_NAME=${kvBinding}
+set KV_NAMESPACE_TITLE=${kvTitle}
 set bianlinang_0ne=${var1n}
 set bianlinang_0ne_zhi=${var1v}
 set bianlinang_two=${var2n}
 set bianlinang_two_zhi=${var2v}
-${extraSets?extraSets+'\r\n':''}set PROJECT_NAME=${projectName}
-set UPLOAD_DIR=${uploadDir}
-
+${extraSets ? extraSets + '\r\n' : ''}
 set BASE_URL=https://api.cloudflare.com/client/v4/accounts/%CLOUDFLARE_ACCOUNT_ID%
-
-:: 新增下面两行，强制同步给 Wrangler 官方标准变量名
 set CF_API_TOKEN=!CLOUDFLARE_API_TOKEN!
 set CF_ACCOUNT_ID=!CLOUDFLARE_ACCOUNT_ID!
+
 cls
 echo.
-echo   ===========================================
-echo      Cloudflare Pages 直传部署工具 v3.1
-echo   ===========================================
-echo.
-echo   -- 基础配置
+echo   ==========================================
+echo      Cloudflare Pages 直传部署工具
+echo   ==========================================
 echo.
 
 :: ================================================
-:: 清理缓存
+:: 清理临时文件
 :: ================================================
-:FINISH
-del /q req_s1.json req_s2.json res_s1.json res_s2.json res_s3.json res_s4a.json res_missing.json res_final.json res_status.json patch_body.json build_patch.ps1 scan_files.ps1 upload_files.ps1 manifest.json upload_list.json check_missing.json batch_upload.json >nul 2>&1
+del /q req_s1.json req_s2.json res_s1.json res_s2.json res_s3.json res_status.json patch_body.json >nul 2>&1
+if exist "%~dp0.wrangler" rd /s /q "%~dp0.wrangler"
+if exist "node_modules\\.cache\\wrangler" rd /s /q "node_modules\\.cache\\wrangler"
 
-if exist "%~dp0.wrangler" (
-    rem 清理 .wrangler 缓存
-    rd /s /q "%~dp0.wrangler"
-)
-if exist "node_modules\\.cache\\wrangler" (
-    rem 清理 wrangler 运行缓存
-    rd /s /q "node_modules\\.cache\\wrangler"
-)
-
+:: ================================================
+:: 交互确认
+:: ================================================
 :INPUT_PROJECT_NAME
 set PROJECT_NAME_INPUT=
 set /p PROJECT_NAME_INPUT=  项目名称 [默认: !PROJECT_NAME!，回车使用]: 
@@ -451,95 +563,78 @@ if "!UPLOAD_DIR_INPUT!"=="" set UPLOAD_DIR_INPUT=!UPLOAD_DIR!
 set UPLOAD_DIR=!UPLOAD_DIR_INPUT!
 if "!UPLOAD_DIR:~-1!"=="\\" set UPLOAD_DIR=!UPLOAD_DIR:~0,-1!
 if not exist "!UPLOAD_DIR!\\" (
-    echo   [!] 路径不存在或不是文件夹，请重新输入
+    echo   [!] 路径不存在，请重新输入
     goto :INPUT_UPLOAD_DIR
 )
 
 echo.
-set SKIP_KV=0${!hasKV?'\r\nset SKIP_KV=1':''}
+set SKIP_KV=${kvEnabled ? '0' : '1'}
 
-
-echo.
 for /f "usebackq delims=" %%D in (\`powershell -NoProfile -Command "(Get-Date).ToString('yyyy-MM-dd')"\`) do set TODAY=%%D
 set COMPAT_DATE=
 set /p COMPAT_DATE=  兼容性日期 [默认: !TODAY!，回车使用]: 
 if "!COMPAT_DATE!"=="" set COMPAT_DATE=!TODAY!
 
 echo.
-set COMPAT_FLAGS_INPUT_0=0
 set COMPAT_FLAGS_INPUT=
-set /p COMPAT_FLAGS_INPUT=  兼容性标志 [可用: nodejs_compat，回车跳过]: 
-if "!COMPAT_FLAGS_INPUT!"=="" set COMPAT_FLAGS_INPUT_0=1
+set /p COMPAT_FLAGS_INPUT=  兼容性标志 [如: nodejs_compat，回车跳过]: 
 
 echo.
-echo   +------------------------------------------+
-echo     配置摘要
 echo   +------------------------------------------+
 echo     项目名称   : !PROJECT_NAME!
 echo     上传目录   : !UPLOAD_DIR!
 echo     变量1      : !bianlinang_0ne!
 echo     变量2      : !bianlinang_two!
-if !SKIP_KV!==0 echo     KV 命名空间: !KV_NAMESPACE_TITLE!
-if !SKIP_KV!==1 echo     KV 命名空间: (跳过)
-echo     KV绑定名称 : !KV_BINDING_NAME!
+if !SKIP_KV!==0 echo     KV 名称    : !KV_NAMESPACE_TITLE!
+if !SKIP_KV!==0 echo     KV 绑定    : !KV_BINDING_NAME!
+if !SKIP_KV!==1 echo     KV         : (跳过)
 echo     兼容日期   : !COMPAT_DATE!
-if !COMPAT_FLAGS_INPUT_0!==0 echo     兼容标志   : !COMPAT_FLAGS_INPUT!
-if !COMPAT_FLAGS_INPUT_0!==1 echo     兼容标志   : (跳过)
 echo   +------------------------------------------+
 echo.
 set CONFIRM=
-set /p CONFIRM=  确认并开始部署？[回车/Y=是  N=退出]: 
-if /i "!CONFIRM!"=="N" (
-    echo   已取消。
-    pause & exit /b 0
-)
+set /p CONFIRM=  确认部署？[回车/Y=是  N=退出]: 
+if /i "!CONFIRM!"=="N" (echo   已取消。& pause & exit /b 0)
 
 :: ================================================
-:: STEP 1
+:: STEP 1 — 创建 Pages 项目
 :: ================================================
 echo.
-echo   -- STEP 1/5  创建 Pages 项目
+echo   STEP 1/5  创建 Pages 项目
 
 :CREATE_PROJECT
 > req_s1.json echo {"name":"!PROJECT_NAME!","production_branch":"main"}
-
 curl -s -X POST "%BASE_URL%/pages/projects" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -H "Content-Type: application/json" -d @req_s1.json -o res_s1.json
 
 findstr /c:"\\"success\\": true" res_s1.json >nul 2>&1
-if not errorlevel 1 (
-    echo   [OK] 项目创建成功
-    goto :STEP2
-)
+if not errorlevel 1 (echo   [OK] 项目创建成功 & goto :STEP2)
 findstr /c:"already exists" res_s1.json >nul 2>&1
-if not errorlevel 1 (
-    echo   [OK] 项目已存在，继续...
-    goto :STEP2
-)
+if not errorlevel 1 (echo   [OK] 项目已存在，继续... & goto :STEP2)
 
-echo   [NG] 项目创建失败:
+echo   [NG] 创建失败:
 type res_s1.json
 echo.
 set C=
-set /p C=  [1] 输入新名称重试  [2/回车] 继续: 
-if "!C!"=="1" (
-    set /p PROJECT_NAME=  新项目名称: 
-    goto :CREATE_PROJECT
-)
-echo   [!] 跳过，继续...
+set /p C=  [1] 重新输入名称  [2/回车] 继续: 
+if "!C!"=="1" (set /p PROJECT_NAME=  新项目名称: & goto :CREATE_PROJECT)
+echo   跳过，继续...
 
 :: ================================================
-:: STEP 2
+:: STEP 2 — 创建 KV 命名空间
 :: ================================================
 :STEP2
 set KV_ID=
 if !SKIP_KV!==1 goto :STEP3
 
 echo.
-echo   -- STEP 2/5  创建 KV 命名空间
+echo   STEP 2/5  创建 KV 命名空间
 
 :CREATE_KV
-> req_s2.json echo {"title":"!KV_NAMESPACE_TITLE!"}
+set KV_NAMESPACE_TITLE_INPUT=
+set /p KV_NAMESPACE_TITLE_INPUT=  KV 名称 [默认: !KV_NAMESPACE_TITLE!，回车使用]: 
+if "!KV_NAMESPACE_TITLE_INPUT!"=="" set KV_NAMESPACE_TITLE_INPUT=!KV_NAMESPACE_TITLE!
+set KV_NAMESPACE_TITLE=!KV_NAMESPACE_TITLE_INPUT!
 
+> req_s2.json echo {"title":"!KV_NAMESPACE_TITLE!"}
 curl -s -X POST "%BASE_URL%/storage/kv/namespaces" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -H "Content-Type: application/json" -d @req_s2.json -o res_s2.json
 
 findstr /c:"\\"success\\":true" res_s2.json >nul 2>&1
@@ -549,176 +644,104 @@ if not errorlevel 1 (
     goto :STEP3
 )
 
-echo   [NG] KV 创建失败：命名空间已存在或发生错误
+echo   [NG] KV 创建失败（名称已存在或其他错误）
+type res_s2.json
 echo.
 set C=
-set /p C=  [1] 输入新名称重试  [2/回车] 跳过KV绑定: 
-if "!C!"=="1" (
-    set /p KV_NAMESPACE_TITLE=  新KV名称: 
-    goto :CREATE_KV
-)
-echo   [!] 跳过KV绑定，继续...
+set /p C=  [1] 重新输入名称重试  [2/回车] 跳过KV绑定: 
+if "!C!"=="1" goto :CREATE_KV
+echo   跳过KV绑定，继续...
+set SKIP_KV=1
 
 :: ================================================
-:: STEP 3
+:: STEP 3 — 配置项目
 :: ================================================
 :STEP3
 echo.
-echo -- STEP 3/5 配置项目
+echo   STEP 3/5  配置项目
 
-set _PROJ=!PROJECT_NAME!
-set _KV_ID=!KV_ID!
-set _KV_BIND=!KV_BINDING_NAME!
-set _DATE=!COMPAT_DATE!
-set _FLAGS=!COMPAT_FLAGS_INPUT!
-set _0ne_zhi=!bianlinang_0ne_zhi!
-set _two_zhi=!bianlinang_two_zhi!
 set "PATCH_JSON_PATH=%~dp0patch_body.json"
-
 if exist "%PATCH_JSON_PATH%" del /q "%PATCH_JSON_PATH%"
-
 chcp 65001 >nul
 
-if "!_KV_ID!"=="" (
-    (
-    echo {
-    echo   "deployment_configs": {
-    echo     "production": {
-    echo       "compatibility_date": "!_DATE!",
-    echo       "compatibility_flags": [],
-${patchEnvSection('      ')}
-    echo     },
-    echo     "preview": {
-    echo       "compatibility_date": "!_DATE!",
-    echo       "compatibility_flags": [],
-${patchEnvSection('      ')}
-    echo     }
-    echo   }
-    echo }
-    ) > "%PATCH_JSON_PATH%"
-) else (
-    (
-    echo {
-    echo   "deployment_configs": {
-    echo     "production": {
-    echo       "compatibility_date": "!_DATE!",
-    echo       "compatibility_flags": [],
-${patchEnvSection('      ')}
-    echo     },
-    echo     "preview": {
-    echo       "compatibility_date": "!_DATE!",
-    echo       "compatibility_flags": [],
-${patchEnvSection('      ')}
-    echo     }
-    echo   }
-    echo }
-    ) > "%PATCH_JSON_PATH%"
-)
+(
+echo {
+echo   "deployment_configs": {
+echo     "production": {
+echo       "compatibility_date": "!COMPAT_DATE!",
+echo       "compatibility_flags": [],
+${patchSection('      ')}
+echo     },
+echo     "preview": {
+echo       "compatibility_date": "!COMPAT_DATE!",
+echo       "compatibility_flags": [],
+${patchSection('      ')}
+echo     }
+echo   }
+echo }
+) > "%PATCH_JSON_PATH%"
 
-chcp 65001 >nul
+if not exist "%PATCH_JSON_PATH%" (echo [NG] 生成配置失败 & pause & goto :STEP4)
 
-if not exist "%PATCH_JSON_PATH%" (
-    echo [NG] 生成配置失败
-    pause
-    goto :STEP4
-)
-
-curl -s -X PATCH "%BASE_URL%/pages/projects/!_PROJ!" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -H "Content-Type: application/json" -d "@%PATCH_JSON_PATH%" -o res_s3.json
+curl -s -X PATCH "%BASE_URL%/pages/projects/!PROJECT_NAME!" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -H "Content-Type: application/json" -d "@%PATCH_JSON_PATH%" -o res_s3.json
 
 findstr /c:"\\"success\\":true" res_s3.json >nul 2>&1
-if not errorlevel 1 (
-    echo [OK] 项目配置成功
-) else (
-    findstr /c:"\\"success\\": true" res_s3.json >nul 2>&1
-    if not errorlevel 1 (
-        echo [OK] 项目配置成功
-    ) else (
-        echo [NG] 配置失败，完整响应:
-        type res_s3.json
-        echo.
-    )
-)
+if not errorlevel 1 (echo   [OK] 配置成功 & goto :STEP4)
+findstr /c:"\\"success\\": true" res_s3.json >nul 2>&1
+if not errorlevel 1 (echo   [OK] 配置成功 & goto :STEP4)
+echo   [NG] 配置失败:
+type res_s3.json
+echo.
 
 :: ================================================
-:: STEP 4
+:: STEP 4 — 部署文件
 :: ================================================
 :STEP4
 echo.
-echo -- STEP 4/5 部署文件到 Cloudflare Pages
-echo.
-echo 项目名称: !PROJECT_NAME!
-echo 部署目录: !UPLOAD_DIR!
-echo.
+echo   STEP 4/5  部署文件
 
-if exist "node_modules\\.cache\\wrangler" (
-    echo [提示] 正在清除冲突的本地账户缓存...
-    rd /s /q "node_modules\\.cache\\wrangler"
-)
-if exist "%APPDATA%\\.wrangler" (
-    rd /s /q "%APPDATA%\\.wrangler\\config" 2>nul
-)
-if exist "%~dp0.wrangler" (
-    rem 清理 .wrangler 缓存
-    rd /s /q "%~dp0.wrangler"
-)
-if exist "node_modules\\.cache\\wrangler" (
-    rem 清理 wrangler 运行缓存
-    rd /s /q "node_modules\\.cache\\wrangler"
-)
+if exist "node_modules\\.cache\\wrangler" rd /s /q "node_modules\\.cache\\wrangler"
+if exist "%APPDATA%\\.wrangler" rd /s /q "%APPDATA%\\.wrangler\\config" 2>nul
+if exist "%~dp0.wrangler" rd /s /q "%~dp0.wrangler"
 
 call npx wrangler pages deploy "!UPLOAD_DIR!" --project-name "!PROJECT_NAME!"
-
-if %ERRORLEVEL% equ 0 (
-    echo.
-    echo [OK] 部署成功!
-) else (
-    echo.
-    echo [NG] 部署过程中出现错误，请检查上方日志。
-)
+if %ERRORLEVEL% equ 0 (echo. & echo   [OK] 部署成功) else (echo. & echo   [NG] 部署出现错误，请检查上方日志)
 
 :: ================================================
-:: STEP 5
+:: STEP 5 — 查询状态
 :: ================================================
 :STEP5
 echo.
-echo   -- STEP 5/5  查询部署状态
+echo   STEP 5/5  查询部署状态
 
 curl -s -X GET "%BASE_URL%/pages/projects/!PROJECT_NAME!/deployments" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -o res_status.json
-
-for /f "usebackq delims=" %%S in (\`powershell -NoProfile -Command "$r=(Get-Content 'res_status.json'|ConvertFrom-Json).result; if($r -and $r.Count -gt 0){$r[0].latest_stage.name+' - '+$r[0].latest_stage.status}else{'(无部署记录)'}"\`) do (
-    echo   部署状态: %%S
-)
+for /f "usebackq delims=" %%S in (\`powershell -NoProfile -Command "$r=(Get-Content 'res_status.json'|ConvertFrom-Json).result; if($r -and $r.Count -gt 0){$r[0].latest_stage.name+' - '+$r[0].latest_stage.status}else{'(无部署记录)'}"\`) do echo   状态: %%S
 
 :: ================================================
 :: 清理
 :: ================================================
-:FINISH
-del /q req_s1.json req_s2.json res_s1.json res_s2.json res_s3.json res_s4a.json res_missing.json res_final.json res_status.json patch_body.json build_patch.ps1 scan_files.ps1 upload_files.ps1 manifest.json upload_list.json check_missing.json batch_upload.json >nul 2>&1
+del /q req_s1.json req_s2.json res_s1.json res_s2.json res_s3.json res_status.json patch_body.json >nul 2>&1
 
 echo.
-echo   ===========================================
+echo   ==========================================
 echo            全部步骤执行完毕
-echo   ===========================================
+echo   ==========================================
 echo.
 pause
 exit /b 0`;
 
-  const previewSection=document.getElementById('previewSection');
-  const previewCode=document.getElementById('previewCode');
-  const downloadBtn=document.getElementById('downloadBtn');
+  const ps = document.getElementById('previewSection');
+  const pc = document.getElementById('previewCode');
+  const dl = document.getElementById('downloadBtn');
 
-  previewSection.classList.add('visible');
-  previewCode.textContent=bat;
+  ps.classList.add('visible');
+  pc.textContent = bat;
 
-  const blob=new Blob(['\uFEFF'+bat],{type:'text/plain;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  downloadBtn.href=url;
-  downloadBtn.download=`deploy_${projectName||'cf'}.bat`;
+  const blob = new Blob(['\uFEFF' + bat], { type: 'text/plain;charset=utf-8' });
+  dl.href = URL.createObjectURL(blob);
+  dl.download = `deploy_${projectName || 'cf'}.bat`;
 
-  setTimeout(()=>previewSection.scrollIntoView({behavior:'smooth',block:'start'}),120);
-  previewCode.classList.remove('flash');
-  void previewCode.offsetWidth;
-  previewCode.classList.add('flash');
+  setTimeout(() => ps.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 </script>
 </body>
