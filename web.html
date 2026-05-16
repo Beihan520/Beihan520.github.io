@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CF Pages 部署配置器</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&family=Geist+Mono:wght@300;400;500&family=Inter:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,400;1,300&family=Space+Grotesk:wght@400;500;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── BASE TOKENS (minimal) ── */
 :root {
   --bg: #f8f7f4;
   --surface: #ffffff;
@@ -19,11 +20,93 @@
   --text-dim: #a09d98;
   --accent: #1a1917;
   --accent-inv: #f8f7f4;
+  --accent-hover: #333;
   --red: #c0392b;
-  --green: #27ae60;
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'IBM Plex Sans', sans-serif;
   --radius: 4px;
+  --locked-bg: #f3f2ef;
+  --border-w: 1px;
+}
+
+/* ── TERMINAL ── */
+[data-theme="terminal"] {
+  --bg: #0c0e0f;
+  --surface: #111416;
+  --border: #1e2428;
+  --border-strong: #2d3740;
+  --text: #c8dde0;
+  --text-mid: #5a7a80;
+  --text-dim: #3a5055;
+  --accent: #00c8a0;
+  --accent-inv: #0c0e0f;
+  --accent-hover: #00e8bc;
+  --red: #ff4d6a;
+  --mono: 'Geist Mono', monospace;
+  --sans: 'Geist Mono', monospace;
+  --radius: 3px;
+  --locked-bg: #0f1315;
+  --border-w: 1px;
+}
+
+/* ── NOTION ── */
+[data-theme="notion"] {
+  --bg: #ffffff;
+  --surface: #f7f6f3;
+  --border: #e9e8e5;
+  --border-strong: #d3d2ce;
+  --text: #37352f;
+  --text-mid: #787672;
+  --text-dim: #b5b4b0;
+  --accent: #2383e2;
+  --accent-inv: #ffffff;
+  --accent-hover: #1a6bc4;
+  --red: #e03e3e;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --radius: 6px;
+  --locked-bg: #eeede9;
+  --border-w: 1px;
+}
+
+/* ── EDITORIAL ── */
+[data-theme="editorial"] {
+  --bg: #f4efe6;
+  --surface: #faf7f1;
+  --border: #ddd5c2;
+  --border-strong: #bfb49e;
+  --text: #1c1a16;
+  --text-mid: #6b6250;
+  --text-dim: #a89e8a;
+  --accent: #b84a2e;
+  --accent-inv: #f4efe6;
+  --accent-hover: #962810;
+  --red: #b84a2e;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Fraunces', serif;
+  --radius: 2px;
+  --locked-bg: #ede8de;
+  --border-w: 1px;
+}
+
+/* ── BRUTAL ── */
+[data-theme="brutal"] {
+  --bg: #f0f0e8;
+  --surface: #ffffff;
+  --border: #000000;
+  --border-strong: #000000;
+  --text: #000000;
+  --text-mid: #333333;
+  --text-dim: #666666;
+  --accent: #000000;
+  --accent-inv: #ffeb00;
+  --accent-hover: #111;
+  --red: #ff2200;
+  --mono: 'Space Grotesk', sans-serif;
+  --sans: 'Space Grotesk', sans-serif;
+  --radius: 0px;
+  --locked-bg: #e8e8e0;
+  --border-w: 2px;
 }
 
 body {
@@ -33,8 +116,75 @@ body {
   font-size: 14px;
   line-height: 1.6;
   min-height: 100vh;
+  transition: background .22s, color .22s;
 }
 
+/* ── THEME BAR ── */
+.theme-bar {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.theme-bar-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: color .22s;
+}
+.theme-pills {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: 99px;
+  padding: 4px 6px;
+  transition: background .22s, border-color .22s;
+}
+.tp {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+  position: relative;
+  flex-shrink: 0;
+}
+.tp:hover { transform: scale(1.18); }
+.tp.active { border-color: var(--text); box-shadow: 0 0 0 1px var(--bg); }
+/* tooltip */
+.tp::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s;
+}
+.tp:hover::after { opacity: 1; }
+
+.tp-minimal   { background: #e8e6e1; }
+.tp-terminal  { background: #00c8a0; }
+.tp-notion    { background: #2383e2; }
+.tp-editorial { background: #b84a2e; }
+.tp-brutal    { background: #ffeb00; border-color: #000 !important; }
+
+/* ── LAYOUT ── */
 .wrap {
   max-width: 680px;
   margin: 0 auto;
@@ -42,14 +192,15 @@ body {
 }
 
 /* header */
-.header { margin-bottom: 56px; }
-.header-label {
+.header { margin-bottom: 52px; }
+.header-eyebrow {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-dim);
   letter-spacing: .12em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  transition: color .22s;
 }
 h1 {
   font-family: var(--mono);
@@ -57,33 +208,53 @@ h1 {
   font-weight: 500;
   color: var(--text);
   margin-bottom: 6px;
+  transition: color .22s, font-family .22s;
 }
-.header-sub {
-  font-size: 13px;
-  color: var(--text-mid);
+[data-theme="editorial"] h1 {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 26px;
+  font-weight: 300;
 }
+[data-theme="brutal"] h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.header-sub { font-size: 13px; color: var(--text-mid); transition: color .22s; }
 
-/* divider */
-hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+hr {
+  border: none;
+  border-top: var(--border-w) solid var(--border);
+  margin: 36px 0;
+  transition: border-color .22s, border-width .22s;
+}
 
 /* section */
-.section { margin-bottom: 36px; }
+.section { margin-bottom: 32px; }
 .section-label {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-dim);
   letter-spacing: .12em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: color .22s;
 }
 .section-label::after {
   content: '';
   flex: 1;
   height: 1px;
   background: var(--border);
+  transition: background .22s;
+}
+[data-theme="brutal"] .section-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
 }
 
 /* fields */
@@ -91,33 +262,40 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 @media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
 
 .field { display: flex; flex-direction: column; gap: 5px; }
-
 .field label {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-mid);
   letter-spacing: .06em;
+  transition: color .22s;
+}
+[data-theme="brutal"] .field label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
 }
 .field label .req { color: var(--red); margin-left: 2px; }
 
 .field input {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: var(--border-w) solid var(--border);
   border-radius: var(--radius);
   padding: 9px 11px;
   font-family: var(--mono);
   font-size: 12.5px;
   color: var(--text);
   outline: none;
-  transition: border-color .15s;
+  transition: border-color .15s, background .22s, color .22s;
   width: 100%;
 }
 .field input:focus { border-color: var(--accent); }
 .field input::placeholder { color: var(--text-dim); }
+
 .field-hint {
   font-size: 11px;
   color: var(--text-dim);
   font-family: var(--mono);
+  transition: color .22s;
 }
 
 /* info */
@@ -128,10 +306,14 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   color: var(--text-mid);
   margin-top: 12px;
   line-height: 1.7;
+  transition: border-color .22s, color .22s;
 }
+[data-theme="terminal"] .info { border-color: var(--accent); opacity: .7; }
+[data-theme="notion"]   .info { border-color: var(--accent); background: #2383e20a; border-radius: 0 4px 4px 0; }
+[data-theme="brutal"]   .info { border-left-width: 3px; }
 .info strong { color: var(--text); font-weight: 500; }
 
-/* env rows */
+/* var rows */
 .var-list { display: flex; flex-direction: column; gap: 8px; }
 .var-row {
   display: grid;
@@ -140,7 +322,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   align-items: end;
 }
 @media (max-width: 560px) { .var-row { grid-template-columns: 1fr; } }
-.var-row.locked .field input { background: #f3f2ef; color: var(--text-mid); }
+.var-row.locked .field input { background: var(--locked-bg); color: var(--text-mid); }
 
 .add-btn {
   display: inline-flex;
@@ -148,7 +330,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   gap: 6px;
   padding: 6px 12px;
   background: transparent;
-  border: 1px solid var(--border-strong);
+  border: var(--border-w) solid var(--border-strong);
   border-radius: var(--radius);
   font-family: var(--mono);
   font-size: 11px;
@@ -158,12 +340,13 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   margin-top: 10px;
 }
 .add-btn:hover { border-color: var(--accent); color: var(--text); }
+[data-theme="brutal"] .add-btn { font-weight: 600; }
 
 .del-btn {
   width: 32px;
   height: 34px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: var(--border-w) solid var(--border);
   border-radius: var(--radius);
   color: var(--text-dim);
   cursor: pointer;
@@ -182,47 +365,55 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: var(--border-w) solid var(--border);
   border-radius: var(--radius);
   cursor: pointer;
   user-select: none;
-  transition: border-color .15s;
+  transition: border-color .15s, background .22s;
   margin-bottom: 12px;
 }
 .toggle-row:hover { border-color: var(--border-strong); }
 .toggle-row.on { border-color: var(--accent); }
 
-.toggle-switch {
+.toggle-sw {
   width: 32px;
   height: 18px;
   background: var(--border-strong);
   border-radius: 9px;
   position: relative;
-  transition: background .15s;
+  transition: background .2s;
   flex-shrink: 0;
 }
-.toggle-switch::after {
+[data-theme="brutal"] .toggle-sw { border-radius: 2px; }
+.toggle-sw::after {
   content: '';
   position: absolute;
-  width: 12px;
-  height: 12px;
-  background: white;
+  width: 12px; height: 12px;
+  background: var(--bg);
   border-radius: 50%;
-  top: 3px;
-  left: 3px;
+  top: 3px; left: 3px;
   transition: transform .15s;
-  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
-.toggle-row.on .toggle-switch { background: var(--accent); }
-.toggle-row.on .toggle-switch::after { transform: translateX(14px); }
-.toggle-label { font-size: 13px; color: var(--text-mid); }
-.toggle-row.on .toggle-label { color: var(--text); }
+[data-theme="brutal"] .toggle-sw::after { border-radius: 1px; }
+.toggle-row.on .toggle-sw { background: var(--accent); }
+.toggle-row.on .toggle-sw::after { transform: translateX(14px); }
+.toggle-lbl { font-size: 13px; color: var(--text-mid); transition: color .22s; }
+.toggle-row.on .toggle-lbl { color: var(--text); }
 
 .collapsible { overflow: hidden; max-height: 0; transition: max-height .3s ease; }
-.collapsible.open { max-height: 400px; }
+.collapsible.open { max-height: 300px; }
 
-/* kv row */
-.kv-block { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.kv-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: all .22s;
+}
 @media (max-width: 560px) { .kv-block { grid-template-columns: 1fr; } }
 
 /* generate */
@@ -235,7 +426,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   padding: 13px;
   background: var(--accent);
   color: var(--accent-inv);
-  border: none;
+  border: var(--border-w) solid var(--accent);
   border-radius: var(--radius);
   font-family: var(--mono);
   font-size: 12px;
@@ -243,11 +434,26 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   letter-spacing: .06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: opacity .15s;
+  transition: background .15s, color .22s;
   margin-top: 40px;
 }
-.generate-btn:hover { opacity: .85; }
-.generate-btn:active { opacity: .7; }
+.generate-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.generate-btn:active { opacity: .75; }
+[data-theme="brutal"] .generate-btn {
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 3px 3px 0 var(--text);
+  transition: box-shadow .1s, transform .1s, background .15s;
+}
+[data-theme="brutal"] .generate-btn:hover {
+  background: var(--accent-hover);
+  box-shadow: 5px 5px 0 var(--text);
+  transform: translate(-1px,-1px);
+}
+[data-theme="brutal"] .generate-btn:active {
+  box-shadow: 1px 1px 0 var(--text);
+  transform: translate(1px,1px);
+}
 
 /* preview */
 .preview-section { margin-top: 40px; display: none; }
@@ -266,19 +472,20 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border: 1px solid var(--accent);
+  border: var(--border-w) solid var(--accent);
   border-radius: var(--radius);
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text);
   text-decoration: none;
-  transition: background .15s;
+  transition: background .15s, color .15s, border-color .22s;
 }
 .dl-btn:hover { background: var(--accent); color: var(--accent-inv); }
+[data-theme="brutal"] .dl-btn { font-weight: 600; }
 
 .preview-code {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: var(--border-w) solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   font-family: var(--mono);
@@ -289,22 +496,36 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   white-space: pre;
   max-height: 400px;
   overflow-y: auto;
+  transition: background .22s, border-color .22s, color .22s;
 }
 .preview-code::-webkit-scrollbar { width: 3px; height: 3px; }
 .preview-code::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
 </style>
 </head>
 <body>
+
+<!-- ── Theme bar ── -->
+<div class="theme-bar">
+  <span class="theme-bar-label">主题</span>
+  <div class="theme-pills">
+    <div class="tp tp-minimal  active" data-tip="简约" onclick="setTheme('minimal',this)"></div>
+    <div class="tp tp-terminal"        data-tip="终端" onclick="setTheme('terminal',this)"></div>
+    <div class="tp tp-notion"          data-tip="Notion" onclick="setTheme('notion',this)"></div>
+    <div class="tp tp-editorial"       data-tip="杂志" onclick="setTheme('editorial',this)"></div>
+    <div class="tp tp-brutal"          data-tip="Brutal" onclick="setTheme('brutal',this)"></div>
+  </div>
+</div>
+
 <div class="wrap">
 
 <!-- Header -->
 <div class="header">
-  <div class="header-label">Cloudflare Pages — Deploy Configurator</div>
+  <div class="header-eyebrow">Cloudflare Pages — Deploy Configurator</div>
   <h1>部署脚本生成器</h1>
   <p class="header-sub">填写参数，生成定制化 .bat 部署脚本</p>
 </div>
 
-<!-- §1 API 凭证 -->
+<!-- §1 -->
 <div class="section">
   <div class="section-label">01 · API 凭证</div>
   <div class="field-grid">
@@ -322,7 +543,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 <hr>
 
-<!-- §2 项目信息 -->
+<!-- §2 -->
 <div class="section">
   <div class="section-label">02 · 项目信息</div>
   <div class="field-grid">
@@ -341,7 +562,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 <hr>
 
-<!-- §3 兼容性 -->
+<!-- §3 -->
 <div class="section">
   <div class="section-label">03 · 兼容性</div>
   <div class="field-grid">
@@ -360,7 +581,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 <hr>
 
-<!-- §4 环境变量 -->
+<!-- §4 -->
 <div class="section">
   <div class="section-label">04 · 环境变量</div>
   <div class="var-list" id="envList"></div>
@@ -373,12 +594,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 <hr>
 
-<!-- §5 KV 绑定 -->
+<!-- §5 -->
 <div class="section">
   <div class="section-label">05 · KV 绑定</div>
   <div class="toggle-row" id="kvToggle" onclick="toggleKV()">
-    <div class="toggle-switch"></div>
-    <div class="toggle-label">启用 KV 命名空间绑定</div>
+    <div class="toggle-sw"></div>
+    <div class="toggle-lbl">启用 KV 命名空间绑定</div>
   </div>
   <div class="collapsible" id="kvSection">
     <div class="kv-block">
@@ -418,14 +639,22 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 </div>
 
 <script>
-// today default
+// today
 (function(){
   const d = new Date();
   document.getElementById('compatDate').value =
-    d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 })();
 
-// KV toggle
+// theme
+function setTheme(name, el) {
+  if (name === 'minimal') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', name);
+  document.querySelectorAll('.tp').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// kv toggle
 let kvEnabled = false;
 function toggleKV() {
   kvEnabled = !kvEnabled;
@@ -439,11 +668,9 @@ function esc(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').re
 
 let envCtr = 0;
 function addEnvRow(name='', val='', locked=false) {
-  const id = ++envCtr;
   const list = document.getElementById('envList');
   const div = document.createElement('div');
   div.className = 'var-row' + (locked ? ' locked' : '');
-  div.dataset.eid = id;
   div.innerHTML = `
     <div class="field">
       <label>变量名称</label>
@@ -456,8 +683,6 @@ function addEnvRow(name='', val='', locked=false) {
     <button class="del-btn" onclick="this.closest('.var-row').remove()" ${locked?'disabled':''} title="删除">${TRASH}</button>`;
   list.appendChild(div);
 }
-
-// seed defaults
 addEnvRow('ADMIN', 'ADMIN', true);
 addEnvRow('UUID', '661471cc-c3c4-45d5-a2e9-3f243330510b', true);
 
@@ -480,9 +705,9 @@ function generateBat() {
   const envVars     = collectEnv();
 
   if (!apiToken || !accountId) { alert('请填写 API Token 和 Account ID'); return; }
-  if (!projectName) { alert('请填写 PROJECT_NAME'); return; }
-  if (!uploadDir)   { alert('请填写 UPLOAD_DIR'); return; }
-  if (!envVars.length) { alert('至少需要一个环境变量'); return; }
+  if (!projectName)            { alert('请填写 PROJECT_NAME'); return; }
+  if (!uploadDir)              { alert('请填写 UPLOAD_DIR'); return; }
+  if (!envVars.length)         { alert('至少需要一个环境变量'); return; }
 
   const var1n = envVars[0]?.name || 'ADMIN';
   const var1v = envVars[0]?.val  || '';
@@ -490,7 +715,6 @@ function generateBat() {
   const var2v = envVars[1]?.val  || '';
   const extraSets = envVars.slice(2).map(v => `set ${v.name}=${v.val}`).join('\r\n');
 
-  // build env_vars echo block for patch JSON
   function envEchoBlock(pad) {
     return envVars.map((v, i) => {
       const comma = i < envVars.length - 1 ? ',' : '';
@@ -498,9 +722,8 @@ function generateBat() {
     }).join('\r\n');
   }
 
-  // patch section (env + optional kv)
   function patchSection(pad) {
-    let out = `    echo ${pad}"env_vars": {\r\n${envEchoBlock(pad + '  ')}\r\n    echo ${pad}}`;
+    let out = `    echo ${pad}"env_vars": {\r\n${envEchoBlock(pad+'  ')}\r\n    echo ${pad}}`;
     if (kvEnabled) {
       out += `,\r\n    echo ${pad}"kv_namespaces": {\r\n    echo ${pad}  "${kvBinding}": { "namespace_id": "!KV_ID!" }\r\n    echo ${pad}}`;
     }
@@ -539,16 +762,10 @@ echo      Cloudflare Pages 直传部署工具
 echo   ==========================================
 echo.
 
-:: ================================================
-:: 清理临时文件
-:: ================================================
 del /q req_s1.json req_s2.json res_s1.json res_s2.json res_s3.json res_status.json patch_body.json >nul 2>&1
 if exist "%~dp0.wrangler" rd /s /q "%~dp0.wrangler"
 if exist "node_modules\\.cache\\wrangler" rd /s /q "node_modules\\.cache\\wrangler"
 
-:: ================================================
-:: 交互确认
-:: ================================================
 :INPUT_PROJECT_NAME
 set PROJECT_NAME_INPUT=
 set /p PROJECT_NAME_INPUT=  项目名称 [默认: !PROJECT_NAME!，回车使用]: 
@@ -595,9 +812,7 @@ set CONFIRM=
 set /p CONFIRM=  确认部署？[回车/Y=是  N=退出]: 
 if /i "!CONFIRM!"=="N" (echo   已取消。& pause & exit /b 0)
 
-:: ================================================
-:: STEP 1 — 创建 Pages 项目
-:: ================================================
+:: ── STEP 1 创建 Pages 项目 ──
 echo.
 echo   STEP 1/5  创建 Pages 项目
 
@@ -618,9 +833,7 @@ set /p C=  [1] 重新输入名称  [2/回车] 继续:
 if "!C!"=="1" (set /p PROJECT_NAME=  新项目名称: & goto :CREATE_PROJECT)
 echo   跳过，继续...
 
-:: ================================================
-:: STEP 2 — 创建 KV 命名空间
-:: ================================================
+:: ── STEP 2 创建 KV ──
 :STEP2
 set KV_ID=
 if !SKIP_KV!==1 goto :STEP3
@@ -644,18 +857,16 @@ if not errorlevel 1 (
     goto :STEP3
 )
 
-echo   [NG] KV 创建失败（名称已存在或其他错误）
+echo   [NG] KV 创建失败
 type res_s2.json
 echo.
 set C=
-set /p C=  [1] 重新输入名称重试  [2/回车] 跳过KV绑定: 
+set /p C=  [1] 重新输入名称重试  [2/回车] 跳过KV: 
 if "!C!"=="1" goto :CREATE_KV
 echo   跳过KV绑定，继续...
 set SKIP_KV=1
 
-:: ================================================
-:: STEP 3 — 配置项目
-:: ================================================
+:: ── STEP 3 配置项目 ──
 :STEP3
 echo.
 echo   STEP 3/5  配置项目
@@ -693,9 +904,7 @@ echo   [NG] 配置失败:
 type res_s3.json
 echo.
 
-:: ================================================
-:: STEP 4 — 部署文件
-:: ================================================
+:: ── STEP 4 部署 ──
 :STEP4
 echo.
 echo   STEP 4/5  部署文件
@@ -707,9 +916,7 @@ if exist "%~dp0.wrangler" rd /s /q "%~dp0.wrangler"
 call npx wrangler pages deploy "!UPLOAD_DIR!" --project-name "!PROJECT_NAME!"
 if %ERRORLEVEL% equ 0 (echo. & echo   [OK] 部署成功) else (echo. & echo   [NG] 部署出现错误，请检查上方日志)
 
-:: ================================================
-:: STEP 5 — 查询状态
-:: ================================================
+:: ── STEP 5 状态查询 ──
 :STEP5
 echo.
 echo   STEP 5/5  查询部署状态
@@ -717,9 +924,6 @@ echo   STEP 5/5  查询部署状态
 curl -s -X GET "%BASE_URL%/pages/projects/!PROJECT_NAME!/deployments" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -o res_status.json
 for /f "usebackq delims=" %%S in (\`powershell -NoProfile -Command "$r=(Get-Content 'res_status.json'|ConvertFrom-Json).result; if($r -and $r.Count -gt 0){$r[0].latest_stage.name+' - '+$r[0].latest_stage.status}else{'(无部署记录)'}"\`) do echo   状态: %%S
 
-:: ================================================
-:: 清理
-:: ================================================
 del /q req_s1.json req_s2.json res_s1.json res_s2.json res_s3.json res_status.json patch_body.json >nul 2>&1
 
 echo.
