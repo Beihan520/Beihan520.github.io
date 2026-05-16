@@ -5,532 +5,390 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CF Pages 部署配置器</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
-
-  :root {
-    --bg: #0a0c10;
-    --surface: #0f1318;
-    --card: #141920;
-    --border: #1e2732;
-    --border-bright: #2d3a4a;
-    --accent: #00d4aa;
-    --accent-dim: #00a882;
-    --accent-glow: rgba(0,212,170,0.15);
-    --accent2: #ff6b35;
-    --text: #c8d8e8;
-    --text-dim: #607080;
-    --text-bright: #e8f4ff;
-    --warning: #ffb347;
-    --error: #ff4d6a;
-    --success: #00d4aa;
-    --mono: 'JetBrains Mono', monospace;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 48px 24px 80px;
-  }
-
-  /* Header */
-  .header {
-    margin-bottom: 48px;
-    padding-bottom: 32px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .header-tag {
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .header-tag::before {
-    content: '';
-    width: 20px;
-    height: 1px;
-    background: var(--accent);
-  }
-
-  h1 {
-    font-family: 'Space Mono', monospace;
-    font-size: clamp(22px, 4vw, 32px);
-    color: var(--text-bright);
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 12px;
-  }
-
-  h1 span {
-    color: var(--accent);
-  }
-
-  .header-sub {
-    font-size: 13px;
-    color: var(--text-dim);
-    letter-spacing: 0.03em;
-  }
-
-  /* Sections */
-  .section {
-    margin-bottom: 36px;
-  }
-
-  .section-title {
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border-bright), transparent);
-  }
-
-  .section-num {
-    width: 20px;
-    height: 20px;
-    background: var(--accent);
-    color: var(--bg);
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  /* Fields */
-  .field-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .field-grid.single { grid-template-columns: 1fr; }
-
-  @media (max-width: 600px) {
-    .field-grid { grid-template-columns: 1fr; }
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-  }
-
-  .field label {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .field label .required {
-    color: var(--accent2);
-    margin-left: 3px;
-  }
-
-  .field input, .field textarea, .field select {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 11px 14px;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text-bright);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-  }
-
-  .field input:focus, .field textarea:focus, .field select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  .field input::placeholder, .field textarea::placeholder {
-    color: var(--text-dim);
-    opacity: 0.5;
-  }
-
-  .field textarea {
-    resize: vertical;
-    min-height: 70px;
-  }
-
-  .field-hint {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-
-  /* Toggle */
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px 14px;
-    cursor: pointer;
-    user-select: none;
-    transition: border-color 0.2s;
-  }
-
-  .toggle-row:hover { border-color: var(--border-bright); }
-  .toggle-row.active { border-color: var(--accent); }
-
-  .toggle-switch {
-    width: 36px;
-    height: 20px;
-    background: var(--border-bright);
-    border-radius: 10px;
-    position: relative;
-    transition: background 0.2s;
-    flex-shrink: 0;
-  }
-
-  .toggle-switch::after {
-    content: '';
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: var(--text-dim);
-    border-radius: 50%;
-    top: 3px;
-    left: 3px;
-    transition: transform 0.2s, background 0.2s;
-  }
-
-  .toggle-row.active .toggle-switch { background: var(--accent-dim); }
-  .toggle-row.active .toggle-switch::after { transform: translateX(16px); background: var(--accent); }
-
-  .toggle-label {
-    font-size: 13px;
-    color: var(--text);
-  }
-
-  /* Collapsible KV section */
-  .kv-section {
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.35s ease;
-  }
-  .kv-section.open { max-height: 200px; }
-
-  /* Generate button */
-  .generate-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 16px;
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: 8px;
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-    text-transform: uppercase;
-    margin-top: 40px;
-  }
-
-  .generate-btn:hover {
-    background: #00eebb;
-    box-shadow: 0 0 24px rgba(0,212,170,0.4);
-    transform: translateY(-1px);
-  }
-
-  .generate-btn:active { transform: translateY(0); }
-
-  .generate-btn svg { flex-shrink: 0; }
-
-  /* Preview */
-  .preview-section {
-    margin-top: 40px;
-    display: none;
-  }
-
-  .preview-section.visible { display: block; }
-
-  .preview-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .preview-code {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    font-size: 11.5px;
-    line-height: 1.7;
-    color: var(--text);
-    overflow-x: auto;
-    white-space: pre;
-    max-height: 360px;
-    overflow-y: auto;
-  }
-
-  /* Scrollbar */
-  .preview-code::-webkit-scrollbar { width: 4px; height: 4px; }
-  .preview-code::-webkit-scrollbar-track { background: transparent; }
-  .preview-code::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
-
-  .download-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 18px;
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    border-radius: 6px;
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    letter-spacing: 0.05em;
-  }
-
-  .download-btn:hover {
-    background: var(--accent-glow);
-    box-shadow: 0 0 12px rgba(0,212,170,0.2);
-  }
-
-  /* Syntax highlight */
-  .kw { color: #7dd3fc; }
-  .val { color: #86efac; }
-  .str { color: #fbbf24; }
-  .cmt { color: #475569; }
-  .var { color: #c084fc; }
-  .cmd { color: var(--accent); }
-
-  /* Flash animation */
-  @keyframes flashBorder {
-    0% { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-    100% { border-color: var(--border); box-shadow: none; }
-  }
-
-  .flash { animation: flashBorder 1s ease forwards; }
-
-  /* Info box */
-  .info-box {
-    background: rgba(0,212,170,0.06);
-    border: 1px solid rgba(0,212,170,0.2);
-    border-radius: 6px;
-    padding: 12px 16px;
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: 8px;
-    line-height: 1.6;
-  }
-
-  .info-box strong { color: var(--accent); }
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
+:root{
+  --bg:#0a0c10;--surface:#0f1318;--card:#141920;
+  --border:#1e2732;--border-bright:#2d3a4a;
+  --accent:#00d4aa;--accent-dim:#00a882;--accent-glow:rgba(0,212,170,.15);
+  --accent2:#ff6b35;--text:#c8d8e8;--text-dim:#607080;--text-bright:#e8f4ff;
+  --error:#ff4d6a;--mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.container{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:48px 24px 90px}
+/* header */
+.header{margin-bottom:44px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.header-tag{font-size:11px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.header-tag::before{content:'';width:20px;height:1px;background:var(--accent)}
+h1{font-family:'Space Mono',monospace;font-size:clamp(20px,4vw,30px);color:var(--text-bright);font-weight:700;line-height:1.2;margin-bottom:10px}
+h1 span{color:var(--accent)}
+.header-sub{font-size:13px;color:var(--text-dim)}
+/* section */
+.section{margin-bottom:32px}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;flex:1}
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border-bright),transparent)}
+.section-num{width:20px;height:20px;background:var(--accent);color:var(--bg);border-radius:3px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+/* fields */
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:640px){.field-grid,.field-grid.cols3{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.field label .req{color:var(--accent2);margin-left:3px}
+.field input{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px 13px;font-family:var(--mono);font-size:13px;color:var(--text-bright);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.field input::placeholder{color:var(--text-dim);opacity:.45}
+.field-hint{font-size:11px;color:var(--text-dim);margin-top:1px}
+/* info box */
+.info-box{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:11px 15px;font-size:12px;color:var(--text-dim);margin-top:10px;line-height:1.6}
+.info-box strong{color:var(--accent)}
+/* toggle */
+.toggle-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:11px 13px;cursor:pointer;user-select:none;transition:border-color .2s}
+.toggle-row:hover{border-color:var(--border-bright)}
+.toggle-row.active{border-color:var(--accent)}
+.toggle-switch{width:36px;height:20px;background:var(--border-bright);border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-switch::after{content:'';position:absolute;width:14px;height:14px;background:var(--text-dim);border-radius:50%;top:3px;left:3px;transition:transform .2s,background .2s}
+.toggle-row.active .toggle-switch{background:var(--accent-dim)}
+.toggle-row.active .toggle-switch::after{transform:translateX(16px);background:var(--accent)}
+.toggle-label{font-size:13px;color:var(--text)}
+.collapsible{overflow:hidden;max-height:0;transition:max-height .35s ease}
+.collapsible.open{max-height:600px}
+/* add btn */
+.add-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;background:transparent;border:1px dashed var(--accent-dim);color:var(--accent);border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.add-btn:hover{background:var(--accent-glow);border-color:var(--accent);box-shadow:0 0 10px rgba(0,212,170,.15)}
+/* env var rows */
+.var-list{display:flex;flex-direction:column;gap:9px}
+.var-row{display:grid;grid-template-columns:1fr 1fr 34px;gap:10px;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:11px 13px;transition:border-color .2s;animation:rowIn .2s ease}
+@keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.var-row:hover{border-color:var(--border-bright)}
+.var-row.locked{border-color:rgba(0,212,170,.2)}
+.badge{display:inline-block;font-size:9px;background:rgba(0,212,170,.12);color:var(--accent);border-radius:3px;padding:1px 5px;margin-left:5px;letter-spacing:.05em;vertical-align:middle}
+.badge-kv{background:rgba(255,107,53,.12);color:var(--accent2)}
+.del-btn{width:34px;height:34px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:20px;flex-shrink:0}
+.del-btn:hover{border-color:var(--error);color:var(--error);background:rgba(255,77,106,.08)}
+.del-btn:disabled{opacity:.2;cursor:not-allowed}
+@media(max-width:640px){.var-row{grid-template-columns:1fr}.del-btn{margin-top:0;width:100%}}
+/* kv rows same style */
+.kv-row{display:grid;grid-template-columns:1fr 1fr 34px;gap:10px;align-items:start;background:var(--card);border:1px solid rgba(255,107,53,.2);border-radius:7px;padding:11px 13px;transition:border-color .2s;animation:rowIn .2s ease;margin-top:10px}
+.kv-row:hover{border-color:rgba(255,107,53,.4)}
+/* generate */
+.generate-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:background .2s,transform .1s,box-shadow .2s;text-transform:uppercase;margin-top:36px}
+.generate-btn:hover{background:#00eebb;box-shadow:0 0 24px rgba(0,212,170,.4);transform:translateY(-1px)}
+.generate-btn:active{transform:translateY(0)}
+/* preview */
+.preview-section{margin-top:36px;display:none}
+.preview-section.visible{display:block}
+.preview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.preview-code{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;font-size:11.5px;line-height:1.7;color:var(--text);overflow-x:auto;white-space:pre;max-height:420px;overflow-y:auto}
+.preview-code::-webkit-scrollbar{width:4px;height:4px}
+.preview-code::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
+.download-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;text-decoration:none}
+.download-btn:hover{background:var(--accent-glow);box-shadow:0 0 12px rgba(0,212,170,.2)}
+@keyframes flashBorder{0%{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}100%{border-color:var(--border);box-shadow:none}}
+.flash{animation:flashBorder 1s ease forwards}
 </style>
 </head>
 <body>
 <div class="container">
 
-  <div class="header">
-    <div class="header-tag">Cloudflare Pages</div>
-    <h1>部署配置生成器 <span>v3.1</span></h1>
-    <p class="header-sub">填写参数，自动生成定制化的 .bat 部署脚本并下载</p>
-  </div>
-
-  <!-- SECTION 1: API 凭证 -->
-  <div class="section">
-    <div class="section-title"><span class="section-num">1</span>API 凭证</div>
-    <div class="field-grid">
-      <div class="field">
-        <label>CLOUDFLARE_API_TOKEN <span class="required">*</span></label>
-        <input type="text" id="apiToken" placeholder="cfat_..." value="">
-      </div>
-      <div class="field">
-        <label>CLOUDFLARE_ACCOUNT_ID <span class="required">*</span></label>
-        <input type="text" id="accountId" placeholder="32位 hex" value="">
-      </div>
-    </div>
-    <div class="info-box" style="margin-top:12px">
-      <strong>权限提示：</strong>Token 需要 <strong>KV Storage</strong> 和 <strong>Pages</strong> 的读写权限
-    </div>
-  </div>
-
-  <!-- SECTION 2: 项目变量 -->
-  <div class="section">
-    <div class="section-title"><span class="section-num">2</span>Pages 环境变量</div>
-    <div class="field-grid">
-      <div class="field">
-        <label>变量1 名称</label>
-        <input type="text" id="var1Name" value="ADMIN">
-        <div class="field-hint">默认: ADMIN</div>
-      </div>
-      <div class="field">
-        <label>变量1 值 <span class="required">*</span></label>
-        <input type="text" id="var1Value" placeholder="管理员账号" value="ADMIN">
-      </div>
-      <div class="field">
-        <label>变量2 名称</label>
-        <input type="text" id="var2Name" value="UUID">
-        <div class="field-hint">默认: UUID</div>
-      </div>
-      <div class="field">
-        <label>变量2 值 <span class="required">*</span></label>
-        <input type="text" id="var2Value" placeholder="UUID 值" value="661471cc-c3c4-45d5-a2e9-3f243330510b">
-      </div>
-    </div>
-  </div>
-
-  <!-- SECTION 3: KV 绑定 -->
-  <div class="section">
-    <div class="section-title"><span class="section-num">3</span>KV 绑定</div>
-    <div class="toggle-row" id="kvToggle" onclick="toggleKV()">
-      <div class="toggle-switch"></div>
-      <div class="toggle-label">启用 KV 命名空间绑定</div>
-    </div>
-    <div class="kv-section" id="kvSection">
-      <div class="field-grid" style="margin-top:14px">
-        <div class="field">
-          <label>KV 绑定名称</label>
-          <input type="text" id="kvBinding" value="KV">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECTION 4: 兼容性 -->
-  <div class="section">
-    <div class="section-title"><span class="section-num">4</span>兼容性配置</div>
-    <div class="field-grid">
-      <div class="field">
-        <label>兼容性日期</label>
-        <input type="text" id="compatDate" placeholder="YYYY-MM-DD" id="compatDate">
-        <div class="field-hint">留空则使用当天日期</div>
-      </div>
-      <div class="field">
-        <label>兼容性标志</label>
-        <input type="text" id="compatFlags" placeholder="nodejs_compat（可选）">
-        <div class="field-hint">多个用逗号分隔，留空跳过</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Generate -->
-  <button class="generate-btn" onclick="generateBat()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-      <path d="M2 17l10 5 10-5"/>
-      <path d="M2 12l10 5 10-5"/>
-    </svg>
-    生成 .bat 脚本
-  </button>
-
-  <!-- Preview -->
-  <div class="preview-section" id="previewSection">
-    <div class="preview-header">
-      <div class="section-title" style="margin:0; flex:1">
-        <span class="section-num" style="background:var(--accent2)">↓</span>
-        预览 &amp; 下载
-      </div>
-      <a class="download-btn" id="downloadBtn" href="#" download="deploy.bat">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        下载 deploy.bat
-      </a>
-    </div>
-    <div class="preview-code" id="previewCode"></div>
-  </div>
-
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-tag">Cloudflare Pages</div>
+  <h1>部署配置生成器 <span>v3.3</span></h1>
+  <p class="header-sub">填写参数，自动生成定制化的 .bat 部署脚本并一键下载</p>
 </div>
 
+<!-- ── §1 API 凭证 ── -->
+<div class="section">
+  <div class="section-hdr">
+    <div class="section-title"><span class="section-num">1</span>API 凭证</div>
+  </div>
+  <div class="field-grid">
+    <div class="field">
+      <label>CLOUDFLARE_API_TOKEN <span class="req">*</span></label>
+      <input id="apiToken" type="text" placeholder="cfat_..." value="cfat_ylquMsVa6veCxYX2H741cqm21P2zjH7Wi9Goji5L3244d87e">
+    </div>
+    <div class="field">
+      <label>CLOUDFLARE_ACCOUNT_ID <span class="req">*</span></label>
+      <input id="accountId" type="text" placeholder="32位 hex" value="e8df7d714dcbf0a2f4591c1a6d821841">
+    </div>
+  </div>
+  <div class="info-box"><strong>权限提示：</strong>Token 需要 <strong>KV Storage</strong> 和 <strong>Pages</strong> 读写权限</div>
+</div>
+
+<!-- ── §2 项目信息 ── -->
+<div class="section">
+  <div class="section-hdr">
+    <div class="section-title"><span class="section-num">2</span>项目基础信息</div>
+  </div>
+  <div class="field-grid">
+    <div class="field">
+      <label>PROJECT_NAME 项目名称 <span class="req">*</span></label>
+      <input id="projectName" type="text" placeholder="my-cf-pages-project">
+      <div class="field-hint">Pages 项目名，不含空格</div>
+    </div>
+    <div class="field">
+      <label>UPLOAD_DIR 本地部署目录 <span class="req">*</span></label>
+      <input id="uploadDir" type="text" placeholder="C:\path\to\dist">
+      <div class="field-hint">要上传的本地文件夹完整路径</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── §3 兼容性 ── -->
+<div class="section">
+  <div class="section-hdr">
+    <div class="section-title"><span class="section-num">3</span>兼容性配置</div>
+  </div>
+  <div class="field-grid">
+    <div class="field">
+      <label>兼容性日期</label>
+      <input id="compatDate" type="text" placeholder="YYYY-MM-DD">
+      <div class="field-hint">留空使用当天日期</div>
+    </div>
+    <div class="field">
+      <label>兼容性标志</label>
+      <input id="compatFlags" type="text" placeholder="nodejs_compat（可选）">
+      <div class="field-hint">多个用逗号分隔，留空跳过</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── §4 Pages 环境变量 ── -->
+<div class="section">
+  <div class="section-hdr">
+    <div class="section-title"><span class="section-num">4</span>Pages 环境变量</div>
+    <button class="add-btn" onclick="addEnvRow()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      添加变量
+    </button>
+  </div>
+  <div class="var-list" id="envList"></div>
+  <div class="info-box">前两行为<strong>必填锁定行</strong>，对应原脚本 ADMIN / UUID；可继续添加任意数量自定义变量，均会写入 production &amp; preview 配置。</div>
+</div>
+
+<!-- ── §5 KV 绑定 ── -->
+<div class="section">
+  <div class="section-hdr">
+    <div class="section-title"><span class="section-num">5</span>KV 绑定</div>
+    <button class="add-btn" id="addKvBtn" onclick="addKvRow()" style="border-color:rgba(255,107,53,.5);color:var(--accent2)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      添加 KV
+    </button>
+  </div>
+  <!-- toggle for enabling KV -->
+  <div class="toggle-row" id="kvToggle" onclick="toggleKV()">
+    <div class="toggle-switch"></div>
+    <div class="toggle-label">启用 KV 命名空间绑定</div>
+  </div>
+  <div class="collapsible" id="kvSection">
+    <!-- default kv row injected by JS -->
+    <div class="var-list" id="kvList"></div>
+    <div class="info-box" style="margin-top:10px;border-color:rgba(255,107,53,.2);background:rgba(255,107,53,.04)">
+      <strong style="color:var(--accent2)">绑定名称</strong> 对应 wrangler 里的 binding，<strong style="color:var(--accent2)">KV 命名空间名称</strong> 用于创建新 KV（运行时可交互修改）。可添加多个 KV 绑定。
+    </div>
+  </div>
+</div>
+
+<!-- ── Generate ── -->
+<button class="generate-btn" onclick="generateBat()">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+  生成 .bat 脚本
+</button>
+
+<!-- ── Preview ── -->
+<div class="preview-section" id="previewSection">
+  <div class="preview-header">
+    <div class="section-title" style="margin:0;flex:1">
+      <span class="section-num" style="background:var(--accent2)">↓</span>预览 &amp; 下载
+    </div>
+    <a class="download-btn" id="downloadBtn" href="#" download="deploy.bat">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      下载 deploy.bat
+    </a>
+  </div>
+  <div class="preview-code" id="previewCode"></div>
+</div>
+
+</div><!-- /container -->
 <script>
-  // Set today's date as default
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth()+1).padStart(2,'0');
-  const dd = String(today.getDate()).padStart(2,'0');
-  document.getElementById('compatDate').value = `${yyyy}-${mm}-${dd}`;
+// ── today default ──────────────────────────────────────────────
+(function(){
+  const d=new Date();
+  document.getElementById('compatDate').value=
+    d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+})();
 
-  let kvEnabled = false;
+// ── KV toggle ─────────────────────────────────────────────────
+let kvEnabled=false;
+function toggleKV(){
+  kvEnabled=!kvEnabled;
+  document.getElementById('kvToggle').classList.toggle('active',kvEnabled);
+  document.getElementById('kvSection').classList.toggle('open',kvEnabled);
+  document.getElementById('addKvBtn').style.opacity=kvEnabled?'1':'0.45';
+  document.getElementById('addKvBtn').style.pointerEvents=kvEnabled?'auto':'none';
+}
 
-  function toggleKV() {
-    kvEnabled = !kvEnabled;
-    const toggle = document.getElementById('kvToggle');
-    const section = document.getElementById('kvSection');
-    toggle.classList.toggle('active', kvEnabled);
-    section.classList.toggle('open', kvEnabled);
+// ── helpers ───────────────────────────────────────────────────
+function esc(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+const TRASH_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+
+// ── env var rows ───────────────────────────────────────────────
+let envCtr=0;
+function addEnvRow(name='',val='',locked=false){
+  const id=++envCtr;
+  const list=document.getElementById('envList');
+  const div=document.createElement('div');
+  div.className='var-row'+(locked?' locked':'');
+  div.dataset.eid=id;
+  div.innerHTML=`
+    <div class="field">
+      <label>变量名称${locked?'<span class="badge">必填</span>':''}</label>
+      <input type="text" placeholder="VAR_NAME" value="${esc(name)}"${locked?' style="border-color:rgba(0,212,170,.3)"':''}>
+    </div>
+    <div class="field">
+      <label>变量值${locked?'<span class="badge">必填</span>':''}</label>
+      <input type="text" placeholder="value" value="${esc(val)}">
+    </div>
+    <button class="del-btn" onclick="delRow(this,'env')" ${locked?'disabled title="默认行不可删"':''} title="删除">${TRASH_SVG}</button>`;
+  list.appendChild(div);
+}
+
+// ── kv rows ───────────────────────────────────────────────────
+let kvCtr=0;
+function addKvRow(binding='KV',kvName=''){
+  const id=++kvCtr;
+  const list=document.getElementById('kvList');
+  const div=document.createElement('div');
+  div.className='kv-row';
+  div.dataset.kid=id;
+  div.innerHTML=`
+    <div class="field">
+      <label>KV 绑定名称 <span class="badge badge-kv">binding</span></label>
+      <input type="text" placeholder="KV" value="${esc(binding)}" style="border-color:rgba(255,107,53,.25)">
+    </div>
+    <div class="field">
+      <label>KV 命名空间名称 <span class="badge badge-kv">title</span></label>
+      <input type="text" placeholder="my-kv-namespace" value="${esc(kvName)}" style="border-color:rgba(255,107,53,.25)">
+    </div>
+    <button class="del-btn" onclick="delRow(this,'kv')" title="删除">${TRASH_SVG}</button>`;
+  list.appendChild(div);
+}
+
+function delRow(btn,type){
+  btn.closest(type==='kv'?'.kv-row':'.var-row').remove();
+}
+
+// seed defaults
+addEnvRow('ADMIN','ADMIN',true);
+addEnvRow('UUID','661471cc-c3c4-45d5-a2e9-3f243330510b',true);
+addKvRow('KV','');
+
+// ── collect ────────────────────────────────────────────────────
+function collectEnv(){
+  return [...document.querySelectorAll('#envList .var-row')].map(r=>{
+    const ins=r.querySelectorAll('input');
+    return{name:ins[0].value.trim(),val:ins[1].value.trim()};
+  }).filter(v=>v.name);
+}
+function collectKV(){
+  return [...document.querySelectorAll('#kvList .kv-row')].map(r=>{
+    const ins=r.querySelectorAll('input');
+    return{binding:ins[0].value.trim(),title:ins[1].value.trim()};
+  }).filter(v=>v.binding);
+}
+
+// ── generate ───────────────────────────────────────────────────
+function generateBat(){
+  const apiToken   =document.getElementById('apiToken').value.trim();
+  const accountId  =document.getElementById('accountId').value.trim();
+  const projectName=document.getElementById('projectName').value.trim();
+  const uploadDir  =document.getElementById('uploadDir').value.trim();
+  const compatDate =document.getElementById('compatDate').value.trim();
+  const compatFlags=document.getElementById('compatFlags').value.trim();
+  const envVars    =collectEnv();
+  const kvRows     =collectKV();
+
+  if(!apiToken||!accountId){alert('请填写 API Token 和 Account ID');return;}
+  if(!projectName){alert('请填写 PROJECT_NAME');return;}
+  if(!uploadDir){alert('请填写 UPLOAD_DIR');return;}
+  if(!envVars.length){alert('至少需要一个环境变量');return;}
+
+  const var1n=envVars[0]?envVars[0].name:'ADMIN';
+  const var1v=envVars[0]?envVars[0].val:'';
+  const var2n=envVars[1]?envVars[1].name:'UUID';
+  const var2v=envVars[1]?envVars[1].val:'';
+
+  // extra vars beyond first two
+  const extraSets=envVars.slice(2).map(v=>`set ${v.name}=${v.val}`).join('\r\n');
+
+  // env_vars echo lines for patch JSON
+  function envEcho(envArr,pad){
+    return envArr.map((v,i)=>{
+      const comma=i<envArr.length-1?',':'';
+      return `    echo ${pad}"${v.name}": { "value": "${v.val.replace(/"/g,'\\"')}" }${comma}`;
+    }).join('\r\n');
+  }
+  const evEcho=envEcho(envVars,'        ');
+
+  // kv_namespaces echo lines
+  function kvEcho(kvArr,pad){
+    return kvArr.map((k,i)=>{
+      const comma=i<kvArr.length-1?',':'';
+      return `    echo ${pad}"${k.binding}": { "namespace_id": "!KV_ID_${k.binding}!" }${comma}`;
+    }).join('\r\n');
+  }
+  const kvEchoBlock=kvEnabled&&kvRows.length?kvEcho(kvRows,'        '):'';
+
+  // build kv creation steps
+  function buildKvSteps(kvArr){
+    if(!kvEnabled||!kvArr.length) return '';
+    return kvArr.map((k,i)=>`
+:: -- 创建 KV: ${k.binding}
+set KV_NAMESPACE_TITLE_${k.binding}=${k.title}
+:CREATE_KV_${k.binding}
+set KV_ID_${k.binding}=
+if "!KV_NAMESPACE_TITLE_${k.binding}!"=="" goto :SKIP_KV_${k.binding}
+> req_kv_${k.binding}.json echo {"title":"!KV_NAMESPACE_TITLE_${k.binding}!"}
+curl -s -X POST "%BASE_URL%/storage/kv/namespaces" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -H "Content-Type: application/json" -d @req_kv_${k.binding}.json -o res_kv_${k.binding}.json
+findstr /c:"\\"success\\":true" res_kv_${k.binding}.json >nul 2>&1
+if not errorlevel 1 (
+    for /f "usebackq delims=" %%I in (\`powershell -NoProfile -Command "(Get-Content 'res_kv_${k.binding}.json' | ConvertFrom-Json).result.id"\`) do set KV_ID_${k.binding}=%%I
+    echo   [OK] KV [${k.binding}] 创建成功，ID: !KV_ID_${k.binding}!
+    goto :SKIP_KV_${k.binding}
+)
+echo   [NG] KV [${k.binding}] 创建失败
+set C=
+set /p C=  [1] 重试  [2/回车] 跳过: 
+if "!C!"=="1" (set /p KV_NAMESPACE_TITLE_${k.binding}=  新名称: & goto :CREATE_KV_${k.binding})
+:SKIP_KV_${k.binding}`).join('\r\n');
   }
 
-  function generateBat() {
-    const apiToken    = document.getElementById('apiToken').value.trim();
-    const accountId   = document.getElementById('accountId').value.trim();
-    const var1Name    = document.getElementById('var1Name').value.trim() || 'ADMIN';
-    const var1Value   = document.getElementById('var1Value').value.trim();
-    const var2Name    = document.getElementById('var2Name').value.trim() || 'UUID';
-    const var2Value   = document.getElementById('var2Value').value.trim();
-    const kvBinding   = document.getElementById('kvBinding').value.trim() || 'KV';
-    const compatDate  = document.getElementById('compatDate').value.trim();
-    const compatFlags = document.getElementById('compatFlags').value.trim();
+  // kv_namespaces patch block
+  function kvPatchBlock(kvArr,pad){
+    if(!kvEnabled||!kvArr.length) return '';
+    const lines=kvArr.map((k,i)=>{
+      const comma=i<kvArr.length-1?',':'';
+      return `    echo ${pad}"${k.binding}": { "namespace_id": "!KV_ID_${k.binding}!" }${comma}`;
+    }).join('\r\n');
+    return `    echo       "kv_namespaces": {\r\n${lines}\r\n    echo       },`;
+  }
 
-    if (!apiToken || !accountId) {
-      alert('请填写 API Token 和 Account ID');
-      return;
+  const hasKV=kvEnabled&&kvRows.length>0;
+  const kvProdBlock=kvPatchBlock(kvRows,'        ');
+
+  // compose env_vars + optional kv_namespaces for patch JSON
+  function patchEnvSection(pad){
+    let out=`    echo ${pad}"env_vars": {\r\n${evEcho}\r\n    echo ${pad}}`;
+    if(hasKV){
+      out+=`,\r\n    echo ${pad}"kv_namespaces": {\r\n${kvEchoBlock}\r\n    echo ${pad}}`;
     }
+    return out;
+  }
 
-    // Build the bat content - preserving original exactly, only replacing variable values
-    const bat = `@echo off
+  const bat=`@echo off
 if "%1"=="--run" goto :MAIN
 cmd /k "%~f0" --run
 exit /b
@@ -542,11 +400,13 @@ chcp 65001 >nul
 :: CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID  给Kv 和page权限
 set CLOUDFLARE_API_TOKEN=${apiToken}
 set CLOUDFLARE_ACCOUNT_ID=${accountId}
-set KV_BINDING_NAME=${kvBinding}
-set bianlinang_0ne=${var1Name}
-set bianlinang_0ne_zhi=${var1Value}
-set bianlinang_two=${var2Name}
-set bianlinang_two_zhi=${var2Value}
+set KV_BINDING_NAME=${kvRows[0]?kvRows[0].binding:'KV'}
+set bianlinang_0ne=${var1n}
+set bianlinang_0ne_zhi=${var1v}
+set bianlinang_two=${var2n}
+set bianlinang_two_zhi=${var2v}
+${extraSets?extraSets+'\r\n':''}set PROJECT_NAME=${projectName}
+set UPLOAD_DIR=${uploadDir}
 
 set BASE_URL=https://api.cloudflare.com/client/v4/accounts/%CLOUDFLARE_ACCOUNT_ID%
 
@@ -568,32 +428,27 @@ echo.
 :FINISH
 del /q req_s1.json req_s2.json res_s1.json res_s2.json res_s3.json res_s4a.json res_missing.json res_final.json res_status.json patch_body.json build_patch.ps1 scan_files.ps1 upload_files.ps1 manifest.json upload_list.json check_missing.json batch_upload.json >nul 2>&1
 
-:: 核心修复：清理当前运行目录下的本地缓存（改用 rem 注释，防止括号崩溃）
 if exist "%~dp0.wrangler" (
-    rem 发现运行目录下的全局 .wrangler 文件夹，强制清理
+    rem 清理 .wrangler 缓存
     rd /s /q "%~dp0.wrangler"
 )
 if exist "node_modules\\.cache\\wrangler" (
-    rem 清理项目依赖内的 wrangler 运行缓存
+    rem 清理 wrangler 运行缓存
     rd /s /q "node_modules\\.cache\\wrangler"
 )
 
 :INPUT_PROJECT_NAME
-set PROJECT_NAME=
-set /p PROJECT_NAME=  项目名称: 
-if "!PROJECT_NAME!"=="" (
-    echo   [!] 不能为空，请重新输入
-    goto :INPUT_PROJECT_NAME
-)
+set PROJECT_NAME_INPUT=
+set /p PROJECT_NAME_INPUT=  项目名称 [默认: !PROJECT_NAME!，回车使用]: 
+if "!PROJECT_NAME_INPUT!"=="" set PROJECT_NAME_INPUT=!PROJECT_NAME!
+set PROJECT_NAME=!PROJECT_NAME_INPUT!
 
 echo.
 :INPUT_UPLOAD_DIR
-set UPLOAD_DIR=
-set /p UPLOAD_DIR=  要上传的本地文件夹路径: 
-if "!UPLOAD_DIR!"=="" (
-    echo   [!] 不能为空，请重新输入
-    goto :INPUT_UPLOAD_DIR
-)
+set UPLOAD_DIR_INPUT=
+set /p UPLOAD_DIR_INPUT=  上传目录 [默认: !UPLOAD_DIR!，回车使用]: 
+if "!UPLOAD_DIR_INPUT!"=="" set UPLOAD_DIR_INPUT=!UPLOAD_DIR!
+set UPLOAD_DIR=!UPLOAD_DIR_INPUT!
 if "!UPLOAD_DIR:~-1!"=="\\" set UPLOAD_DIR=!UPLOAD_DIR:~0,-1!
 if not exist "!UPLOAD_DIR!\\" (
     echo   [!] 路径不存在或不是文件夹，请重新输入
@@ -601,10 +456,8 @@ if not exist "!UPLOAD_DIR!\\" (
 )
 
 echo.
-set SKIP_KV=0
-set KV_NAMESPACE_TITLE=
-set /p KV_NAMESPACE_TITLE=  KV 命名空间名称 [回车跳过不创建]: 
-if "!KV_NAMESPACE_TITLE!"=="" set SKIP_KV=1
+set SKIP_KV=0${!hasKV?'\r\nset SKIP_KV=1':''}
+
 
 echo.
 for /f "usebackq delims=" %%D in (\`powershell -NoProfile -Command "(Get-Date).ToString('yyyy-MM-dd')"\`) do set TODAY=%%D
@@ -683,6 +536,7 @@ if !SKIP_KV!==1 goto :STEP3
 
 echo.
 echo   -- STEP 2/5  创建 KV 命名空间
+${buildKvSteps(kvRows)}
 
 :CREATE_KV
 > req_s2.json echo {"title":"!KV_NAMESPACE_TITLE!"}
@@ -710,17 +564,8 @@ echo   [!] 跳过KV绑定，继续...
 :: STEP 3
 :: ================================================
 :STEP3
-:: ================================================
-:: STEP 3
-:: ================================================
 :STEP3
-:: ================================================
-:: STEP 3
-:: ================================================
 :STEP3
-:: ================================================
-:: STEP 3
-:: ================================================
 :STEP3
 echo.
 echo -- STEP 3/5 配置项目
@@ -734,13 +579,10 @@ set _0ne_zhi=!bianlinang_0ne_zhi!
 set _two_zhi=!bianlinang_two_zhi!
 set "PATCH_JSON_PATH=%~dp0patch_body.json"
 
-:: 清空旧的临时配置文件
 if exist "%PATCH_JSON_PATH%" del /q "%PATCH_JSON_PATH%"
 
-:: 临时切换到 UTF-8 编码环境来写文件，确保中文和特殊符号不乱码
 chcp 65001 >nul
 
-:: 根据 KV 是否绑定，采用纯原生 echo 输出最标准、最干净的 JSON
 if "!_KV_ID!"=="" (
     (
     echo {
@@ -748,18 +590,12 @@ if "!_KV_ID!"=="" (
     echo     "production": {
     echo       "compatibility_date": "!_DATE!",
     echo       "compatibility_flags": [],
-    echo       "env_vars": {
-    echo         "ADMIN": { "value": "!_0ne_zhi!" },
-    echo         "UUID": { "value": "!_two_zhi!" }
-    echo       }
+${patchEnvSection('      ')}
     echo     },
     echo     "preview": {
     echo       "compatibility_date": "!_DATE!",
     echo       "compatibility_flags": [],
-    echo       "env_vars": {
-    echo         "ADMIN": { "value": "!_0ne_zhi!" },
-    echo         "UUID": { "value": "!_two_zhi!" }
-    echo       }
+${patchEnvSection('      ')}
     echo     }
     echo   }
     echo }
@@ -771,31 +607,18 @@ if "!_KV_ID!"=="" (
     echo     "production": {
     echo       "compatibility_date": "!_DATE!",
     echo       "compatibility_flags": [],
-    echo       "env_vars": {
-    echo         "ADMIN": { "value": "!_0ne_zhi!" },
-    echo         "UUID": { "value": "!_two_zhi!" }
-    echo       },
-    echo       "kv_namespaces": {
-    echo         "!_KV_BIND!": { "namespace_id": "!_KV_ID!" }
-    echo       }
+${patchEnvSection('      ')}
     echo     },
     echo     "preview": {
     echo       "compatibility_date": "!_DATE!",
     echo       "compatibility_flags": [],
-    echo       "env_vars": {
-    echo         "ADMIN": { "value": "!_0ne_zhi!" },
-    echo         "UUID": { "value": "!_two_zhi!" }
-    echo       },
-    echo       "kv_namespaces": {
-    echo         "!_KV_BIND!": { "namespace_id": "!_KV_ID!" }
-    echo       }
+${patchEnvSection('      ')}
     echo     }
     echo   }
     echo }
     ) > "%PATCH_JSON_PATH%"
 )
 
-:: 恢复全局代码页（防止后续流程显示异常）
 chcp 65001 >nul
 
 if not exist "%PATCH_JSON_PATH%" (
@@ -804,7 +627,6 @@ if not exist "%PATCH_JSON_PATH%" (
     goto :STEP4
 )
 
-:: 向 Cloudflare 发起 Patch 请求
 curl -s -X PATCH "%BASE_URL%/pages/projects/!_PROJ!" -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -H "Content-Type: application/json" -d "@%PATCH_JSON_PATH%" -o res_s3.json
 
 findstr /c:"\\"success\\":true" res_s3.json >nul 2>&1
@@ -832,27 +654,22 @@ echo 项目名称: !PROJECT_NAME!
 echo 部署目录: !UPLOAD_DIR!
 echo.
 
-:: 核心修复：强行清理旧项目的残留运行缓存，防止它死死咬住错误的账户ID不放
 if exist "node_modules\\.cache\\wrangler" (
     echo [提示] 正在清除冲突的本地账户缓存...
     rd /s /q "node_modules\\.cache\\wrangler"
 )
 if exist "%APPDATA%\\.wrangler" (
-    :: 部分全局安装的 wrangler 缓存路径，顺便一并清理
     rd /s /q "%APPDATA%\\.wrangler\\config" 2>nul
 )
-
-:: 核心修复：清理当前运行目录下的本地缓存（改用 rem 注释，防止括号崩溃）
 if exist "%~dp0.wrangler" (
-    rem 发现运行目录下的全局 .wrangler 文件夹，强制清理
+    rem 清理 .wrangler 缓存
     rd /s /q "%~dp0.wrangler"
 )
 if exist "node_modules\\.cache\\wrangler" (
-    rem 清理项目依赖内的 wrangler 运行缓存
+    rem 清理 wrangler 运行缓存
     rd /s /q "node_modules\\.cache\\wrangler"
 )
 
-:: 恢复标准命令调用，去掉冲突的命令行参数，让它纯净地加载环境变量
 call npx wrangler pages deploy "!UPLOAD_DIR!" --project-name "!PROJECT_NAME!"
 
 if %ERRORLEVEL% equ 0 (
@@ -890,30 +707,23 @@ echo.
 pause
 exit /b 0`;
 
-    // Show preview
-    const previewSection = document.getElementById('previewSection');
-    const previewCode = document.getElementById('previewCode');
-    const downloadBtn = document.getElementById('downloadBtn');
+  const previewSection=document.getElementById('previewSection');
+  const previewCode=document.getElementById('previewCode');
+  const downloadBtn=document.getElementById('downloadBtn');
 
-    previewSection.classList.add('visible');
-    previewCode.textContent = bat;
+  previewSection.classList.add('visible');
+  previewCode.textContent=bat;
 
-    // Create download
-    const blob = new Blob([bat], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    downloadBtn.href = url;
-    downloadBtn.download = `deploy_${Date.now()}.bat`;
+  const blob=new Blob(['\uFEFF'+bat],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  downloadBtn.href=url;
+  downloadBtn.download=`deploy_${projectName||'cf'}.bat`;
 
-    // Scroll to preview
-    setTimeout(() => {
-      previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-
-    // Flash the preview
-    previewCode.classList.remove('flash');
-    void previewCode.offsetWidth;
-    previewCode.classList.add('flash');
-  }
+  setTimeout(()=>previewSection.scrollIntoView({behavior:'smooth',block:'start'}),120);
+  previewCode.classList.remove('flash');
+  void previewCode.offsetWidth;
+  previewCode.classList.add('flash');
+}
 </script>
 </body>
 </html>
