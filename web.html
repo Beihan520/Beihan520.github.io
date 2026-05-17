@@ -899,24 +899,7 @@ set "PATCH_JSON_PATH=%~dp0patch_body.json"
 if exist "%PATCH_JSON_PATH%" del /q "%PATCH_JSON_PATH%"
 chcp 65001 >nul
 
-:: ---- 根据 SKIP_KV 决定是否写入 kv_namespaces 字段 ----
-if !SKIP_KV!==1 (
-    echo   [~] 跳过 KV 绑定，生成不含 kv_namespaces 的配置...
-(
-echo {
-echo   "deployment_configs": {
-echo     "production": {
-echo       "compatibility_date": "!COMPAT_DATE!",
-echo       "compatibility_flags": [],
-echo     },
-echo     "preview": {
-echo       "compatibility_date": "!COMPAT_DATE!",
-echo       "compatibility_flags": [],
-echo     }
-echo   }
-echo }
-) > "%PATCH_JSON_PATH%"
-) else (
+
 (
 echo {
 echo   "deployment_configs": {
@@ -933,7 +916,7 @@ echo     }
 echo   }
 echo }
 ) > "%PATCH_JSON_PATH%"
-)
+
 
 if not exist "%PATCH_JSON_PATH%" (echo [NG] 生成配置失败 & pause & goto :STEP4)
 
