@@ -857,11 +857,35 @@ if not errorlevel 1 (
     goto :STEP3
 )
 
-echo   [NG] KV 创建失败
+:: ---- 名称已存在 → 从列表查询对应 ID ----
+findstr /c:"already exists" res_s2.json >nul 2>&1
+if not errorlevel 1 (
+    echo   [~] KV 名称已存在，正在从列表查询已有 KV ID...
+    curl -s -X GET "%BASE_URL%/storage/kv/namespaces?per_page=100" ^
+        -H "Authorization: Bearer %CLOUDFLARE_API_TOKEN%" -o res_kv_list.json
+    for /f "usebackq delims=" %%I in (`powershell -NoProfile -Command ^
+        "try { $list=(Get-Content 'res_kv_list.json' | ConvertFrom-Json).result; $match=$list | Where-Object { $_.title -eq '!KV_NAMESPACE_TITLE!' } | Select-Object -First 1; if($match){ $match.id } else { 'NOT_FOUND' } } catch { 'NOT_FOUND' }"`) do set KV_ID=%%I
+    del /q res_kv_list.json >nul 2>&1
+    if "!KV_ID!"=="NOT_FOUND" (
+        echo   [NG] 列表中未找到名称为 [!KV_NAMESPACE_TITLE!] 的 KV，请确认名称
+        echo.
+        set C=
+        set /p C=  [1] 重新输入名称重试  [2/回车] 跳过KV绑定: 
+        if "!C!"=="1" goto :CREATE_KV
+        echo   跳过KV绑定，继续...
+        set SKIP_KV=1
+        goto :STEP3
+    )
+    echo   [OK] 已获取已有 KV ID: !KV_ID!
+    goto :STEP3
+)
+ 
+:: ---- 其他未知错误 ----
+echo   [NG] KV 创建失败（未知错误）:
 type res_s2.json
 echo.
 set C=
-set /p C=  [1] 重新输入名称重试  [2/回车] 跳过KV: 
+set /p C=  [1] 重新输入名称重试  [2/回车] 跳过KV绑定: 
 if "!C!"=="1" goto :CREATE_KV
 echo   跳过KV绑定，继续...
 set SKIP_KV=1
@@ -875,6 +899,24 @@ set "PATCH_JSON_PATH=%~dp0patch_body.json"
 if exist "%PATCH_JSON_PATH%" del /q "%PATCH_JSON_PATH%"
 chcp 65001 >nul
 
+:: ---- 根据 SKIP_KV 决定是否写入 kv_namespaces 字段 ----
+if !SKIP_KV!==1 (
+    echo   [~] 跳过 KV 绑定，生成不含 kv_namespaces 的配置...
+(
+echo {
+echo   "deployment_configs": {
+echo     "production": {
+echo       "compatibility_date": "!COMPAT_DATE!",
+echo       "compatibility_flags": [],
+echo     },
+echo     "preview": {
+echo       "compatibility_date": "!COMPAT_DATE!",
+echo       "compatibility_flags": [],
+echo     }
+echo   }
+echo }
+) > "%PATCH_JSON_PATH%"
+) else (
 (
 echo {
 echo   "deployment_configs": {
@@ -891,6 +933,7 @@ echo     }
 echo   }
 echo }
 ) > "%PATCH_JSON_PATH%"
+)
 
 if not exist "%PATCH_JSON_PATH%" (echo [NG] 生成配置失败 & pause & goto :STEP4)
 
